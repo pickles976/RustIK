@@ -1,0 +1,3 @@
+- [x] Try out the nalgebra library
+- [x] Add testing for generating transform matrices
+- [ ]
