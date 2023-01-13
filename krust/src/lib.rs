@@ -1,6 +1,20 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4};
-use std::{ops::Mul};
+use std::{ops::Mul, vec};
+
+const IDENTITY: Matrix4<f32> = Matrix4::new(  
+    1.0,0.0,0.0,0.0,
+    0.0,1.0,0.0,0.0,
+    0.0,0.0,1.0,0.0,
+    0.0,0.0,0.0,1.0  
+);
+
+const ORIGIN: Matrix4<f32> = Matrix4::new(  
+    1.0,0.0,0.0,0.0,
+    0.0,1.0,0.0,0.0,
+    0.0,0.0,1.0,0.0,
+    0.0,0.0,0.0,1.0  
+);
 
 /// Create a homogeneous transformation matrix with an angle, axis and position
 pub fn transform_matrix(angle: f32, axis: &Vector3<f32>, position: &Vector3<f32>) -> Matrix4<f32> {
@@ -12,6 +26,7 @@ pub fn transform_matrix(angle: f32, axis: &Vector3<f32>, position: &Vector3<f32>
 
 }
 
+/// Create a Vec of homogeneous transform matrices from minimal parameters
 pub fn generate_matrices(angles: Vec<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f32>) -> Vec<Matrix4<f32>> {
 
     assert!(angles.len() == axes.len() && angles.len() == radii.len(), 
@@ -19,39 +34,46 @@ pub fn generate_matrices(angles: Vec<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f
 
     let radii:Vec<Vector3<f32>> = radii.iter().map(|radius|(Vector3::new(0.0,0.0,*radius))).collect();
 
-    let data: Vec<Matrix4<f32>> = angles.iter()
+    let mut matrices: Vec<Matrix4<f32>> = vec![ORIGIN];
+
+    angles.iter()
     .zip(axes.iter())
     .zip(radii.iter())
-    .map(
+    .for_each(
         |((angle, axis), radius)|
-        (transform_matrix(*angle,axis,radius))).collect();
+        (matrices.push(transform_matrix(*angle,axis,radius))));
 
-    data
+    matrices
 
 }
 
-// pub struct Solver {
-//     axes: Vec<Vector3<f32>>,
-//     radii: Vec<f32>,
-//     thetas: Vec<f32>,
-//     mats: Vec<Matrix4<f32>>,
-//     // forward_mats: Vec<Matrix4<f32>>,
-//     // backward_mats: Vec<Matrix4<f32>>,
-//     // end_effector: Matrix4<f32>,
-//     // target: Matrix4<f32>,
-// }
+/// generate all the forward partial matrix products
+/// [ O, O x A, O x A x B, O x A x B x C]
+pub fn generate_forward_matrices(matrices: &Vec<Matrix4<f32>>) -> Vec<Matrix4<f32>> {
 
-// impl Solver {
+    let mut forward: Vec<Matrix4<f32>> = vec![ORIGIN];
 
-//     pub fn new(axes: Vec<Vector3<f32>>, radii: Vec<f32>,thetas: Vec<f32>) -> Solver {
+    for i in 1..matrices.len() {
+        forward.push(matrices[i] * forward[i - 1]);
+    }
 
+    forward
 
+}
 
-//         Solver {
-//             axes: axes,
-//             radii: radii,
-//             thetas: thetas
-//         }
+/// generate all the backwards partial matrix products
+/// [E, D x E, C x D x E] -> [C x D x E, D x E, E] + [ I ]
+pub fn generate_backward_matrices(matrices: &Vec<Matrix4<f32>>) -> Vec<Matrix4<f32>> {
 
-//     }
-// }
+    let mut backward: Vec<Matrix4<f32>> = vec![matrices[matrices.len() - 1]];
+
+    for i in 1..matrices.len() {
+        backward.push(matrices[matrices.len() - i - 1] * backward[i - 1]);
+    }
+
+    backward.reverse();
+    backward.push(IDENTITY);
+
+    backward
+
+}

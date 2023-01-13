@@ -1,3 +1,8 @@
 - [x] Try out the nalgebra library
 - [x] Add testing for generating transform matrices
-- [ ]
+- [x] Create function to generate vec of matrices from vecs of specs
+- [x] Test function
+- [x] Create forward and backward mat functions
+- [x] Test forward and backward mat functions
+- [ ] Move origin outside function
+- [ ] test updated functions
