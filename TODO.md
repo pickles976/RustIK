@@ -10,4 +10,6 @@
 - [x] Make solver and matrix methods have a common interface
 - [x] Add debug print method to solver
 - [x] Organize
-- [ ] Test solver
+- [x] Test solver
+- [ ] Implement gradient descent for Solver
+- [ ] Test gradient descent convergence
