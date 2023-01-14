@@ -11,5 +11,9 @@
 - [x] Add debug print method to solver
 - [x] Organize
 - [x] Test solver
+- [x] Implement and test loss function
 - [ ] Implement gradient descent for Solver
 - [ ] Test gradient descent convergence
+- [ ] Try out threading for gradient descent
+- [ ] Export WASM
+- [ ] Test in browser

@@ -7,7 +7,7 @@ mod matrices_tests {
 
     use na::{Vector3, Matrix4};
     use std::{f32::consts::PI};
-    use krust::matrices::{transform_matrix, generate_matrices, generate_forward_matrices, generate_backward_matrices};
+    use krust::matrices::{transform_matrix, generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_loss};
 
     const ORIGIN: Matrix4<f32> = Matrix4::new(  
         1.0,0.0,0.0,0.0,
@@ -172,6 +172,41 @@ mod matrices_tests {
         assert!(relative_eq!(b_mat_2, backward_mats[2]));
         assert!(relative_eq!(b_mat_3, backward_mats[3]));
         assert!(relative_eq!(ORIGIN, backward_mats[4]));
+
+    }
+
+    #[test]
+    fn test_transform_loss() {
+
+        let actual : Matrix4<f32> = Matrix4::new(  
+            1.0,0.0,0.0,0.0,
+            0.0,1.0,0.0,0.0,
+            0.0,0.0,1.0,0.0,
+            0.0,0.0,0.0,1.0  
+        );
+
+        let expected_d : Matrix4<f32> = Matrix4::new(  
+            1.0,0.0,0.0,0.0,
+            0.0,1.0,0.0,0.0,
+            0.0,0.0,1.0,10.0,
+            0.0,0.0,0.0,1.0  
+        );
+
+        let expected_r : Matrix4<f32> = Matrix4::new(  
+            1.0,0.0,0.0,0.0,
+            0.0,0.0,-1.0,0.0,
+            0.0,1.0,0.0,0.0,
+            0.0,0.0,0.0,1.0  
+        );
+
+        let dist_correction: f32 = 1.0;
+        let rot_correction: f32 = 1.0;
+
+        let d_loss: f32 = transform_loss(&actual, &expected_d, dist_correction, rot_correction);
+        assert!(relative_eq!(d_loss, 100.0));
+
+        let r_loss: f32 = transform_loss(&actual, &expected_r, dist_correction, rot_correction);
+        assert!(relative_eq!(r_loss, 4.0));
 
     }
 
