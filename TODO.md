@@ -4,5 +4,10 @@
 - [x] Test function
 - [x] Create forward and backward mat functions
 - [x] Test forward and backward mat functions
-- [ ] Move origin outside function
-- [ ] test updated functions
+- [x] Move origin outside function
+- [x] test updated functions
+- [x] Add solver
+- [ ] Make solver and matrix methods have a common interface
+- [ ] Add debug print method to solver
+- [ ] Organize crate properly
+- [ ] Test solver

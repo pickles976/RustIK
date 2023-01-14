@@ -2,12 +2,21 @@
 extern crate approx; // For the macro relative_eq!
 extern crate nalgebra as na;
 
+pub mod matrices;
+
 #[cfg(test)]
 mod tests {
 
     use na::{Vector3, Matrix4};
     use std::{f32::consts::PI};
-    use krust::{transform_matrix, generate_matrices, generate_forward_matrices, generate_backward_matrices};
+
+    const ORIGIN: Matrix4<f32> = Matrix4::new(  
+        1.0,0.0,0.0,0.0,
+        0.0,1.0,0.0,0.0,
+        0.0,0.0,1.0,0.0,
+        0.0,0.0,0.0,1.0  
+    );
+    
 
     #[test]
     fn test_transform_creation() {
@@ -65,7 +74,7 @@ mod tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        let test_mats: Vec<Matrix4<f32>> = generate_matrices(angles, axes, radii);
+        let test_mats: Vec<Matrix4<f32>> = generate_matrices(ORIGIN, &angles, &axes, &radii);
 
         // asset matrix has length 3
         assert_eq!(test_mats.len(), 4);
@@ -84,19 +93,12 @@ mod tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        generate_matrices(angles, axes, radii);
+        generate_matrices(ORIGIN, angles, axes, radii);
 
     }
 
     #[test]
-    fn test_forward_matrices() {
-
-        let origin : Matrix4<f32> = Matrix4::new(  
-            1.0,0.0,0.0,0.0,
-            0.0,1.0,0.0,0.0,
-            0.0,0.0,1.0,0.0,
-            0.0,0.0,0.0,1.0  
-        );
+    fn test_forward_backward_matrices() {
 
         let f_mat_1 : Matrix4<f32> = Matrix4::new(  
             1.0,0.0,0.0,0.0,
@@ -151,13 +153,13 @@ mod tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::z_axis(), *Vector3::y_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![5.0,4.0,0.0];
 
-        let matrices: Vec<Matrix4<f32>> = generate_matrices(angles, axes, radii);
+        let matrices: Vec<Matrix4<f32>> = generate_matrices(ORIGIN, angles, axes, radii);
 
         // Forward mats
         let forward_mats : Vec<Matrix4<f32>> = generate_forward_matrices(&matrices);
 
         assert_eq!(forward_mats.len(), 4);
-        assert!(relative_eq!(origin, forward_mats[0]));
+        assert!(relative_eq!(ORIGIN, forward_mats[0]));
         assert!(relative_eq!(f_mat_1, forward_mats[1]));
         assert!(relative_eq!(f_mat_2, forward_mats[2]));
         assert!(relative_eq!(f_mat_3, forward_mats[3], max_relative=1.0));
@@ -170,7 +172,7 @@ mod tests {
         assert!(relative_eq!(b_mat_1, backward_mats[1]));
         assert!(relative_eq!(b_mat_2, backward_mats[2]));
         assert!(relative_eq!(b_mat_3, backward_mats[3]));
-        assert!(relative_eq!(origin, backward_mats[4]));
+        assert!(relative_eq!(ORIGIN, backward_mats[4]));
 
     }
 
