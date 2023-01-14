@@ -1,6 +1,6 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4};
-use std::fmt;
+use std::{fmt, f32::consts::PI};
 use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices};
 
 pub struct Solver {
@@ -10,13 +10,22 @@ pub struct Solver {
     pub thetas: Vec<f32>,
     pub origin: Matrix4<f32>, 
 
+    arm_length: f32,
+    pub end_effector: Matrix4<f32>,
+    target: Option<Matrix4<f32>>,
+
     pub mats: Vec<Matrix4<f32>>,
     pub forward_mats: Vec<Matrix4<f32>>,
     pub backward_mats: Vec<Matrix4<f32>>,
 
+    pub loss: f32,
+    iterations: i32,
+
 }
 
 impl Solver {
+
+    const ROT_CORRECTION: f32 = PI;
 
     pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> Solver {
 
@@ -31,9 +40,16 @@ impl Solver {
             axes: axes.to_vec(),
             radii: radii.to_vec(),
 
+            arm_length: radii.iter().sum(),
+            end_effector: matrices[matrices.len() - 1],
+            target: None,
+
             forward_mats: generate_forward_matrices(&matrices),
             backward_mats: generate_backward_matrices(&matrices),
             mats: matrices,
+
+            loss: 100.0,
+            iterations: 0,
         }
     }
 
