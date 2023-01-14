@@ -1,45 +1,23 @@
-pub mod matrices;
-
 extern crate nalgebra as na;
-use matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices};
-use na::{Vector3, Matrix4};
+use na::Vector3;
+use std::{f32::consts::PI};
 
-pub struct Solver {
+pub mod matrices;
+pub mod solver;
 
-    axes: Vec<Vector3<f32>>,
-    radii: Vec<f32>,
-    thetas: Vec<f32>,
-    origin: Matrix4<f32>, 
+use matrices::IDENTITY;
+use crate::solver::Solver;
 
-    mats: Vec<Matrix4<f32>>,
-    forward_mats: Vec<Matrix4<f32>>,
-    backward_mats: Vec<Matrix4<f32>>,
+fn main() {
 
-}
+    println!("Hello!");
 
-impl Solver {
+    let angles: Vec<f32> = vec![PI / 2.0,PI / 4.0,0.0];
+    let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
+    let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-    pub fn new(axes: Vec<Vector3<f32>>, radii: Vec<f32>, thetas: Vec<f32>, origin: Matrix4<f32>) -> Solver {
+    let ik_solver = Solver::new(IDENTITY, angles, axes, radii);
 
-        let matrices: Vec<Matrix4<f32>> = generate_matrices(origin, &thetas, &axes, &radii);
-
-        Solver {
-            axes: axes,
-            radii: radii,
-            thetas: thetas,
-            origin: origin,
-
-            forward_mats: generate_forward_matrices(&matrices),
-            backward_mats: generate_backward_matrices(&matrices),
-            mats: matrices,
-
-        }
-    }
-
-    pub fn generate_mats(&mut self) {
-        self.mats = generate_matrices(self.origin, &self.thetas, &self.axes, &self.radii);
-        self.forward_mats = generate_forward_matrices(&self.mats);
-        self.backward_mats = generate_backward_matrices(&self.mats);
-    }
+    println!("{}", ik_solver);
 
 }

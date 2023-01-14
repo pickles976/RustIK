@@ -7,7 +7,7 @@
 - [x] Move origin outside function
 - [x] test updated functions
 - [x] Add solver
-- [ ] Make solver and matrix methods have a common interface
-- [ ] Add debug print method to solver
-- [ ] Organize crate properly
+- [x] Make solver and matrix methods have a common interface
+- [x] Add debug print method to solver
+- [x] Organize
 - [ ] Test solver

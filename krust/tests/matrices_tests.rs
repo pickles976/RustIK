@@ -2,13 +2,12 @@
 extern crate approx; // For the macro relative_eq!
 extern crate nalgebra as na;
 
-pub mod matrices;
-
 #[cfg(test)]
-mod tests {
+mod matrices_tests {
 
     use na::{Vector3, Matrix4};
     use std::{f32::consts::PI};
+    use krust::matrices::{transform_matrix, generate_matrices, generate_forward_matrices, generate_backward_matrices};
 
     const ORIGIN: Matrix4<f32> = Matrix4::new(  
         1.0,0.0,0.0,0.0,
@@ -93,7 +92,7 @@ mod tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        generate_matrices(ORIGIN, angles, axes, radii);
+        generate_matrices(ORIGIN, &angles, &axes, &radii);
 
     }
 
@@ -153,7 +152,7 @@ mod tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::z_axis(), *Vector3::y_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![5.0,4.0,0.0];
 
-        let matrices: Vec<Matrix4<f32>> = generate_matrices(ORIGIN, angles, axes, radii);
+        let matrices: Vec<Matrix4<f32>> = generate_matrices(ORIGIN, &angles, &axes, &radii);
 
         // Forward mats
         let forward_mats : Vec<Matrix4<f32>> = generate_forward_matrices(&matrices);
