@@ -12,9 +12,9 @@
 - [x] Organize
 - [x] Test solver
 - [x] Implement and test loss function
-- [ ] Test matrix functions against expected values from js
-- [ ] Implement gradient descent for Solver
-- [ ] Test gradient descent convergence
+- [x] Test matrix functions against expected values from js
+- [x] Implement gradient descent for Solver
+- [x] Test gradient descent convergence
 - [ ] Add momentum and learn rate for gradient descent
 - [ ] Try out threading for gradient descent
 - [ ] Export WASM

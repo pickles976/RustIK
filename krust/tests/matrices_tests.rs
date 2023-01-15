@@ -114,7 +114,7 @@ mod matrices_tests {
     }
 
     #[test]
-    fn test_forward_backward_matrices() {
+    fn test_forward_matrices() {
 
         let f_mat_1 : Matrix4<f32> = Matrix4::new(  
             1.0,0.0,0.0,0.0,

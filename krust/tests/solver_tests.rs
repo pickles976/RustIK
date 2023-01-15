@@ -59,10 +59,13 @@ mod solver_tests {
 
         ik_solver.target = Some(ORIGIN);
 
+        let mut prev_loss = 100.0;
+
         for i in 0..5 {
             ik_solver.update_matrices();
             ik_solver.update_thetas();
-            // println!("Loss is: {}", ik_solver.loss);
+            assert!(ik_solver.loss < prev_loss);
+            prev_loss = ik_solver.loss;
         }
 
     }
