@@ -17,7 +17,6 @@ mod solver_tests {
         0.0,0.0,0.0,1.0  
     );
     
-
     #[test]
     fn test_new_solver_success() {
 
@@ -31,6 +30,7 @@ mod solver_tests {
         assert_eq!(angles, ik_solver.thetas);
         assert_eq!(axes, ik_solver.axes);
         assert_eq!(radii, ik_solver.radii);
+        assert_eq!(9.0, ik_solver.arm_length);
 
     }
 
@@ -44,6 +44,26 @@ mod solver_tests {
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
         Solver::new(ORIGIN, &angles, &axes, &radii);
+
+    }
+
+    #[test]
+    fn test_solver_run() {
+
+        // Small case
+        let angles: Vec<f32> = vec![0.0,0.0,0.0];
+        let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
+        let radii: Vec<f32> = vec![5.0,3.0,1.0];
+
+        let mut ik_solver: Solver = Solver::new(IDENTITY, &angles, &axes, &radii);
+
+        ik_solver.target = Some(ORIGIN);
+
+        for i in 0..5 {
+            ik_solver.update_matrices();
+            ik_solver.update_thetas();
+            // println!("Loss is: {}", ik_solver.loss);
+        }
 
     }
     
