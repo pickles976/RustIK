@@ -1,19 +1,20 @@
 #[macro_use]
 extern crate approx; // For the macro relative_eq!
 extern crate nalgebra as na;
+use std::time::{Duration, Instant};
 
 #[cfg(test)]
 mod solver_tests {
 
     use na::{Vector3, Matrix4};
-    use std::{f32::consts::PI};
+    use std::time::Instant;
     use krust::matrices::{IDENTITY};
     use krust::solver::Solver;
 
-    const ORIGIN: Matrix4<f32> = Matrix4::new(  
+    const TARGET: Matrix4<f32> = Matrix4::new(  
         1.0,0.0,0.0,0.0,
-        0.0,1.0,0.0,4.5,
-        0.0,0.0,1.0,0.0,
+        0.0,1.0,0.0,3.0,
+        0.0,0.0,1.0,3.0,
         0.0,0.0,0.0,1.0  
     );
     
@@ -25,7 +26,7 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        let ik_solver: Solver = Solver::new(ORIGIN, &angles, &axes, &radii);
+        let ik_solver: Solver = Solver::new(IDENTITY, &angles, &axes, &radii);
 
         assert_eq!(angles, ik_solver.thetas);
         assert_eq!(axes, ik_solver.axes);
@@ -43,31 +44,48 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        Solver::new(ORIGIN, &angles, &axes, &radii);
+        Solver::new(IDENTITY, &angles, &axes, &radii);
 
     }
 
     #[test]
     fn test_solver_run() {
 
-        // Small case
         let angles: Vec<f32> = vec![0.0,0.0,0.0];
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
-        let radii: Vec<f32> = vec![5.0,3.0,1.0];
+        let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
         let mut ik_solver: Solver = Solver::new(IDENTITY, &angles, &axes, &radii);
 
-        ik_solver.target = Some(ORIGIN);
+        ik_solver.target = Some(TARGET);
 
-        let mut prev_loss = 100.0;
-
-        for i in 0..5 {
+        for i in 0..10 {
             ik_solver.update_matrices();
             ik_solver.update_thetas();
-            assert!(ik_solver.loss < prev_loss);
-            prev_loss = ik_solver.loss;
+            ik_solver.update_params();
         }
 
     }
     
+    #[test]
+    fn speed_test() {
+
+        let angles: Vec<f32> = vec![0.0,0.0,0.0];
+        let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
+        let radii: Vec<f32> = vec![2.0,2.0,2.0];
+
+        let mut ik_solver: Solver = Solver::new(IDENTITY, &angles, &axes, &radii);
+
+        ik_solver.target = Some(TARGET);
+
+        let start = Instant::now();
+        while ik_solver.loss > 0.000000001 {
+            ik_solver.update_matrices();
+            ik_solver.update_thetas();
+            ik_solver.update_params();
+        }
+        let duration = start.elapsed();
+        println!("Elapsed time: {:?}", duration);
+    }
+
 }

@@ -15,7 +15,17 @@
 - [x] Test matrix functions against expected values from js
 - [x] Implement gradient descent for Solver
 - [x] Test gradient descent convergence
-- [ ] Add momentum and learn rate for gradient descent
-- [ ] Try out threading for gradient descent
+- [x] Add momentum and learn rate for gradient descent
+- [x] Time functions
+- [ ] Add threading gradient descent
+- [ ] See if threading is actually worth it
+- [ ] Add solver method
+- [ ] Add base class for Solver
+- [ ] Add GA Solver
+- [ ] Add threading GA
 - [ ] Export WASM
-- [ ] Test in browser
+- [ ] Use in browser
+- [ ] do small Vulkan Rust project
+- [ ] Add GPGPU compute to GA Solver
+- [ ] Add angle constraints
+- [ ] Add collision constraints

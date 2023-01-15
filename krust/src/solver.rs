@@ -1,6 +1,6 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
-use std::{fmt, f32::consts::PI, char::MAX};
+use std::{fmt, f32::consts::PI};
 use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self};
 
 const ROT_CORRECTION: f32 = PI;
@@ -24,15 +24,25 @@ pub struct Solver {
     pub loss: f32,
     pub iterations: i32,
 
+    learn_rate: f32,
+    current_learn_rate: f32,
+    decay: f32,
+    momentums: Vec<f32>,
+    momentum_retain: f32,
+
 }
 
+/// The base Solver class. 
+/// Uses gradient descent to solve IK for a given target position
 impl Solver {
 
     pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> Solver {
 
+        // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
         "Vector lengths unequal! angles: {}, axes: {}, radii: {}", thetas.len(), axes.len(), radii.len());
 
+        // Generate the matrices to avoid Option<> for matrix types
         let matrices: Vec<Matrix4<f32>> = generate_matrices(origin, &thetas, &axes, &radii);
 
         Solver {
@@ -51,10 +61,16 @@ impl Solver {
 
             loss: 100.0,
             iterations: 0,
+
+            learn_rate: 0.7,
+            current_learn_rate: 0.7,
+            decay: 0.000005,
+            momentums: vec![0.0; thetas.len()],
+            momentum_retain: 0.25,
         }
     }
 
-    /// Generate mats and 
+    /// Generate mats and update end-effector position/loss for the given configuration
     pub fn update_matrices(&mut self) {
         self.mats = generate_matrices(self.origin, &self.thetas, &self.axes, &self.radii);
         self.forward_mats = generate_forward_matrices(&self.mats);
@@ -64,6 +80,7 @@ impl Solver {
         self.loss = self.calculate_loss(&self.end_effector);
     }
 
+    /// Perform a gradient descent step to update arm angles
     pub fn update_thetas(&mut self) {
 
         let d: f32 = 0.00001;
@@ -82,19 +99,33 @@ impl Solver {
             // clamp d_loss
             let d_loss = clamp(d_loss, -MAX_D_LOSS, MAX_D_LOSS);
 
-            // TODO: add momentum
-            let nudge = d_loss * 0.7;
+            // momentum
+            let nudge = (self.momentums[i] * self.momentum_retain) + (d_loss * self.learn_rate);
 
             self.thetas[i] -= nudge;
+            self.momentums[i] = nudge;
         }
 
     }
 
-    pub fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
+    /// Update learning parameters
+    pub fn update_params(&mut self) {
+        self.iterations += 1;
+        self.current_learn_rate = self.learn_rate * (1.0 / (1.0 + self.decay * self.iterations as f32));
+    }
+
+    /// Calculate loss for the descent
+    fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
         distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
     }
 
-    
+    // Reset parameters between runs
+    pub fn reset_params(&mut self) {
+        self.iterations = 0;
+        self.loss = 100.0;
+        self.current_learn_rate = self.learn_rate;
+        self.momentums = vec![0.0; self.thetas.len()];
+    }
 
 }
 
