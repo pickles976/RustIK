@@ -1,25 +1,24 @@
-use rand::Rng;
+use std::f32::consts::PI;
+
+use rand::{Rng, rngs::ThreadRng};
 
 const MUTATION_SIZE: f32 = 0.25; // how large a mutation can be
+const MUTATION_RATE: f32 = 0.2;
 
-struct Gene {
+pub struct Gene {
     
-    parent1: Option<&Gene>,
-    parent2: Option<&Gene>,
-    learn_rate: f32,
-    thetas: Vec<f32>,
+    pub learn_rate: f32,
+    pub thetas: Vec<f32>,
     // angle constraints
 
 }
 
 impl Gene {
 
-    pub fn new(thetas: Vec<f32>, learn_rate: f32) -> Gene {
+    pub fn new(thetas: &Vec<f32>, learn_rate: f32) -> Gene {
         Gene {
-            parent1: None,
-            parent2: None,
             learn_rate: learn_rate,
-            thetas: thetas,
+            thetas: thetas.to_vec(),
         }
     }
 
@@ -27,21 +26,132 @@ impl Gene {
 
         assert!(parent1.thetas.len() == parent2.thetas.len(), "Parent gene lengths unequal! {} {}", parent1.thetas.len(), parent2.thetas.len());
 
-        let mut rng = rand::thread_rng();
+        let mut rng: ThreadRng = rand::thread_rng();
 
         // crossover
-        let repr = parent1.thetas.iter().zip(parent2.iter.zip()).map(|(theta_1, theta_2)| {
-            let new_theta = if rng.gen::<f32>() > 0.5 {theta_1} else {theta_2};
+        let repr: Vec<f32> = parent1.thetas.iter().zip(parent2.thetas.iter()).map(|(theta_1, theta_2)| {
+            let new_theta: f32 = if rng.gen::<f32>() > 0.5 {*theta_1} else {*theta_2};
+            new_theta
         }).collect();
 
-        assert!();
-
         Gene {
-            parent1: Some(parent1),
-            parent2: Some(parent2),
             learn_rate: parent1.learn_rate,
             thetas: repr,
         }
+
+    }
+
+    pub fn mutate(&mut self) {
+
+        let mut rng: ThreadRng = rand::thread_rng();
+
+        for i in 0..self.thetas.len() {
+            if rng.gen::<f32>() < MUTATION_RATE {
+                self.thetas[i] = self.thetas[i] + MUTATION_SIZE * PI * (rng.gen::<f32>() - 0.5);
+                // clamp to constraints
+            } 
+        }
+    }
+
+}
+
+pub struct Population {
+
+    // fitness function,
+    fitness: Option<fn(&Gene) -> f32>,
+
+    size: i32,
+    generation: i32,
+    alpha: Option<Vec<f32>>,
+    min_err: f32,
+    members: Vec<Gene>,
+
+}
+
+impl Population {
+
+    pub fn new(size: i32, thetas: Vec<f32>) -> Population {
+
+        let mut first_gen: Vec<Gene> = Vec::new();
+
+        for i in 0..size {
+            first_gen.push(Gene::new(&thetas, 0.5));
+        }
+
+        Population {
+            fitness: None,
+            size: size,
+            generation: 0,
+            alpha: None,
+            min_err: f32::MAX,
+            members: first_gen,
+        }
+
+    }
+
+    pub fn new_generation(&mut self) {
+        self.generation += 1;
+        
+        // softmax scores
+        let scores: Vec<f32> = self.get_scores();
+        let softmax: Vec<f32> = self.softmax(&scores);
+
+        // get population member with highest fitness
+        let index = self.argmax(&softmax);
+        self.alpha = Some(self.members[index].thetas.to_vec());
+        self.min_err = 1.0 / scores[index];
+
+        let mut new_pop: Vec<&Gene> = Vec::new();
+
+        // breed new population
+        for i in 0..self.size {
+            let p1: &Gene = self.pick_parent(&scores);
+            let p2: &Gene = self.pick_parent(&scores);
+
+            let temp_gene: &Gene = &Gene::from_parents(p1, p2);
+            new_pop.push(temp_gene);
+        }
+
+        self.members = new_pop;
+
+    }
+
+    fn get_scores(&self) -> Vec<f32>{
+
+        let scores = self.members.iter().map(|gene: &Gene| {
+            return self.fitness.unwrap()(gene);
+        }).collect();
+
+        scores
+    }
+
+    fn softmax(&self, scores: &Vec<f32>) -> Vec<f32> {
+        let sum: f32 = scores.iter().sum();
+        scores.iter().map(|score: &f32| score / sum).collect()
+    }
+
+    fn argmax(&self, scores: &Vec<f32>) -> usize {
+        scores
+        .iter()
+        .enumerate()
+        .max_by(|(_, a), (_, b)| a.total_cmp(b))
+        .map(|(index, _)| index)
+        .unwrap() // unwrap because guaranteed nonexistence of NaN
+    }
+
+    fn pick_parent(&self, scores: &Vec<f32>) -> &Gene {
+
+        let mut rng: ThreadRng = rand::thread_rng();
+        let mut thresh: f32 = 0.0;
+
+        for i in 0..self.size {
+            thresh += scores[i as usize];
+            if thresh > rng.gen::<f32>() {
+                return &self.members[i as usize]
+            }
+        }
+
+        &self.members[0]
 
     }
 

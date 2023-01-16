@@ -21,6 +21,7 @@
 - [ ] Add GA Solver
 - [ ] Add threading
 - [ ] Add base class for Solver (shared traits)
+- [ ] Re-organize library to only expose solvers
 - [ ] Export WASM
 - [ ] Use in browser
 - [ ] do small WebGPU Rust project

@@ -4,6 +4,7 @@ use std::{f32::consts::PI};
 
 pub mod matrices;
 pub mod solver;
+pub mod genetics;
 
 use matrices::IDENTITY;
 use crate::solver::Solver;
