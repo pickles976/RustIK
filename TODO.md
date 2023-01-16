@@ -17,15 +17,13 @@
 - [x] Test gradient descent convergence
 - [x] Add momentum and learn rate for gradient descent
 - [x] Time functions
-- [ ] Add threading gradient descent
-- [ ] See if threading is actually worth it
-- [ ] Add solver method
-- [ ] Add base class for Solver
+- [x] Add solve method
 - [ ] Add GA Solver
-- [ ] Add threading GA
+- [ ] Add threading
+- [ ] Add base class for Solver (shared traits)
 - [ ] Export WASM
 - [ ] Use in browser
-- [ ] do small Vulkan Rust project
+- [ ] do small WebGPU Rust project
 - [ ] Add GPGPU compute to GA Solver
 - [ ] Add angle constraints
 - [ ] Add collision constraints

@@ -60,15 +60,13 @@ mod solver_tests {
         ik_solver.target = Some(TARGET);
 
         for i in 0..10 {
-            ik_solver.update_matrices();
-            ik_solver.update_thetas();
-            ik_solver.update_params();
+            ik_solver.update();
         }
 
     }
     
     #[test]
-    fn speed_test() {
+    fn test_solver_solve() {
 
         let angles: Vec<f32> = vec![0.0,0.0,0.0];
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
@@ -79,11 +77,7 @@ mod solver_tests {
         ik_solver.target = Some(TARGET);
 
         let start = Instant::now();
-        while ik_solver.loss > 0.000000001 {
-            ik_solver.update_matrices();
-            ik_solver.update_thetas();
-            ik_solver.update_params();
-        }
+        ik_solver.solve(TARGET, 0.000000001);
         let duration = start.elapsed();
         println!("Elapsed time: {:?}", duration);
     }

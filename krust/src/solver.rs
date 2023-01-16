@@ -5,6 +5,7 @@ use crate::matrices::{generate_matrices, generate_forward_matrices, generate_bac
 
 const ROT_CORRECTION: f32 = PI;
 const MAX_D_LOSS: f32 = 0.5;
+const MAX_STEPS: i32 = 250;
 
 pub struct Solver {
 
@@ -71,7 +72,7 @@ impl Solver {
     }
 
     /// Generate mats and update end-effector position/loss for the given configuration
-    pub fn update_matrices(&mut self) {
+    fn update_matrices(&mut self) {
         self.mats = generate_matrices(self.origin, &self.thetas, &self.axes, &self.radii);
         self.forward_mats = generate_forward_matrices(&self.mats);
         self.backward_mats = generate_backward_matrices(&self.mats);
@@ -81,7 +82,7 @@ impl Solver {
     }
 
     /// Perform a gradient descent step to update arm angles
-    pub fn update_thetas(&mut self) {
+    fn update_thetas(&mut self) {
 
         let d: f32 = 0.00001;
 
@@ -109,9 +110,35 @@ impl Solver {
     }
 
     /// Update learning parameters
-    pub fn update_params(&mut self) {
+    fn update_params(&mut self) {
         self.iterations += 1;
         self.current_learn_rate = self.learn_rate * (1.0 / (1.0 + self.decay * self.iterations as f32));
+    }
+
+    pub fn update(&mut self) {
+        self.update_matrices();
+        self.update_thetas();
+        self.update_params();
+    }
+
+    pub fn solve(&mut self, target: Matrix4<f32>, thresh: f32) {
+
+        self.target = Some(target);
+        self.reset_params();
+
+        while self.loss > thresh {
+            
+            if (self.iterations < MAX_STEPS) {
+                self.update();
+            } else {
+                println!("Failed to solve in {} steps!", self.iterations);
+                return;
+            }
+
+        }
+
+        println!("Solution found in {} steps!", self.iterations);
+
     }
 
     /// Calculate loss for the descent
