@@ -1,9 +1,9 @@
-use std::f32::consts::PI;
-
+use std::{f32::consts::PI, fmt};
 use rand::{Rng, rngs::ThreadRng};
+use pariter::{IteratorExt as _, scope};
 
 const MUTATION_SIZE: f32 = 0.25; // how large a mutation can be
-const MUTATION_RATE: f32 = 0.2;
+const MUTATION_RATE: f32 = 0.4;
 
 pub struct Gene {
     
@@ -47,7 +47,7 @@ impl Gene {
 
         for i in 0..self.thetas.len() {
             if rng.gen::<f32>() < MUTATION_RATE {
-                self.thetas[i] = self.thetas[i] + MUTATION_SIZE * PI * (rng.gen::<f32>() - 0.5);
+                self.thetas[i] += MUTATION_SIZE * PI * (rng.gen::<f32>() - 0.5);
                 // clamp to constraints
             } 
         }
@@ -55,22 +55,28 @@ impl Gene {
 
 }
 
+impl fmt::Display for Gene {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,"Thetas: {:?}", self.thetas)
+    }
+}
+
 pub struct Population {
 
     // fitness function,
-    fitness: Option<fn(&Gene) -> f32>,
+    fitness: fn(&Vec<f32>) -> f32,
 
-    size: i32,
-    generation: i32,
-    alpha: Option<Vec<f32>>,
-    min_err: f32,
+    pub size: i32,
+    pub generation: i32,
+    pub alpha: Option<Vec<f32>>,
+    pub min_err: f32,
     members: Vec<Gene>,
 
 }
 
 impl Population {
 
-    pub fn new(size: i32, thetas: Vec<f32>) -> Population {
+    pub fn new(size: i32, thetas: Vec<f32>, fitness: fn(&Vec<f32>) -> f32) -> Population {
 
         let mut first_gen: Vec<Gene> = Vec::new();
 
@@ -79,7 +85,7 @@ impl Population {
         }
 
         Population {
-            fitness: None,
+            fitness: fitness,
             size: size,
             generation: 0,
             alpha: None,
@@ -89,6 +95,7 @@ impl Population {
 
     }
 
+    ///
     pub fn new_generation(&mut self) {
         self.generation += 1;
         
@@ -101,14 +108,15 @@ impl Population {
         self.alpha = Some(self.members[index].thetas.to_vec());
         self.min_err = 1.0 / scores[index];
 
-        let mut new_pop: Vec<&Gene> = Vec::new();
+        let mut new_pop: Vec<Gene> = Vec::new();
 
         // breed new population
         for i in 0..self.size {
             let p1: &Gene = self.pick_parent(&scores);
             let p2: &Gene = self.pick_parent(&scores);
 
-            let temp_gene: &Gene = &Gene::from_parents(p1, p2);
+            let mut temp_gene: Gene = Gene::from_parents(p1, p2);
+            temp_gene.mutate();
             new_pop.push(temp_gene);
         }
 
@@ -116,20 +124,23 @@ impl Population {
 
     }
 
+    ///
     fn get_scores(&self) -> Vec<f32>{
 
         let scores = self.members.iter().map(|gene: &Gene| {
-            return self.fitness.unwrap()(gene);
+            return (self.fitness)(&gene.thetas);
         }).collect();
 
         scores
     }
 
+    ///
     fn softmax(&self, scores: &Vec<f32>) -> Vec<f32> {
         let sum: f32 = scores.iter().sum();
         scores.iter().map(|score: &f32| score / sum).collect()
     }
 
+    ///
     fn argmax(&self, scores: &Vec<f32>) -> usize {
         scores
         .iter()
@@ -139,6 +150,7 @@ impl Population {
         .unwrap() // unwrap because guaranteed nonexistence of NaN
     }
 
+    ///
     fn pick_parent(&self, scores: &Vec<f32>) -> &Gene {
 
         let mut rng: ThreadRng = rand::thread_rng();
