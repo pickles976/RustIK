@@ -22,6 +22,9 @@
 - [x] Add threading with rayon
 - [x] Add GA Solver
 - [ ] Test GA Solver
+- [ ] Add set_target() method to GD solver, consolidate reset params method?
+- [ ] Move Vector clone calls into IKSolverGA constructor
+- [ ] Remove references from IKSolverGD constructor
 - [ ] Add base class for Solver (shared traits)
 - [ ] Learn how to actually do threading efficiently
 - [ ] Re-organize library to only expose solvers

@@ -113,7 +113,7 @@ impl IKSolverGA {
 
     pub fn solve(&mut self, target: Matrix4<f32>, thresh: f32) {
 
-        self.target = Some(target);
+        self.set_target(target);
         self.reset_params();
 
         while self.loss > thresh {

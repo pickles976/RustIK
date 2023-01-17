@@ -100,6 +100,7 @@ impl Population {
         self.generation += 1;
         
         // softmax scores
+        // let scores: Vec<f32> = self.get_scores();
         let scores: Vec<f32> = self.get_scores_threaded();
         let softmax: Vec<f32> = self.softmax(&scores);
 
