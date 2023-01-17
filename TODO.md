@@ -18,9 +18,10 @@
 - [x] Add momentum and learn rate for gradient descent
 - [x] Time functions
 - [x] Add solve method
+- [ ] Fix the circular reference issue with the population/solver references
 - [ ] Add GA Solver
-- [ ] Add threading
 - [ ] Add base class for Solver (shared traits)
+- [ ] Learn how to actually do threading efficiently
 - [ ] Re-organize library to only expose solvers
 - [ ] Export WASM
 - [ ] Use in browser
