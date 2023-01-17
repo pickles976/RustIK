@@ -42,22 +42,20 @@ mod genetics_tests {
         let thetas: Vec<f32> = vec![5.0, 5.0, 5.0, 5.0];
 
         // fitness function measures closeness to this thing
-        fn fitness(t: &Vec<f32>) -> f32 {
+        let closure = move |thetas: &Vec<f32>| -> f32 {
 
-            let target: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0];
+            let target: Vec<f32> = vec![0.0; thetas.len()];
 
             let mut total: f32 = 0.0;
 
             for i in 0..target.len() {
-                total += f32::powf(target[i] - t[i], 2.0);
+                total += f32::powf(target[i] - thetas[i], 2.0);
             }
 
             1.0 / total
         };
 
-        let fitness: fn(&Vec<f32>) -> f32 = fitness;
-
-        let mut population: Population = Population::new(100, thetas, fitness);
+        let mut population: Population = Population::new(100, thetas, Box::new(closure));
 
         let start = Instant::now();
         for i in 0..100 {

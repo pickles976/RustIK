@@ -1,9 +1,8 @@
 use std::{f32::consts::PI, fmt, sync::{Arc, Mutex, MutexGuard}, thread, cell::RefCell};
 use rand::{Rng, rngs::ThreadRng};
+use rayon::prelude::*;
 
-use crate::solver_ga::IKSolverGA;
-
-const MUTATION_SIZE: f32 = 0.25; // how large a mutation can be
+const MUTATION_SIZE: f32 = 1.0; // how large a mutation can be
 const MUTATION_RATE: f32 = 0.4;
 
 pub struct Gene {
@@ -65,7 +64,7 @@ impl fmt::Display for Gene {
 pub struct Population {
 
     // fitness function,
-    solver: Rc<RefCell<IKSolverGA>>,
+    fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>,
 
     pub size: i32,
     pub generation: i32,
@@ -77,7 +76,7 @@ pub struct Population {
 
 impl Population {
 
-    pub fn new(size: i32, thetas: &Vec<f32>, solver: &IKSolverGA) -> Population {
+    pub fn new(size: i32, thetas: Vec<f32>, fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>) -> Population {
 
         let mut first_gen: Vec<Gene> = Vec::new();
 
@@ -86,7 +85,7 @@ impl Population {
         }
 
         Population {
-            solver: solver,
+            fitness: fitness,
             size: size,
             generation: 0,
             alpha: None,
@@ -101,7 +100,7 @@ impl Population {
         self.generation += 1;
         
         // softmax scores
-        let scores: Vec<f32> = self.get_scores();
+        let scores: Vec<f32> = self.get_scores_threaded();
         let softmax: Vec<f32> = self.softmax(&scores);
 
         // get population member with highest fitness
@@ -129,42 +128,18 @@ impl Population {
     fn get_scores(&self) -> Vec<f32>{
 
         let scores = self.members.iter().map(|gene: &Gene| {
-            return (self.solver.fitness)(&gene.thetas);
+            return (*self.fitness)(&gene.thetas);
         }).collect();
 
         scores
     }
 
-    // fn get_scores_threaded(&self) -> Vec<f32> {
+    fn get_scores_threaded(&self) -> Vec<f32> {
 
-    //     // threadsafe scores vector
-    //     let scores: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(vec![]));
-    //     let mut threads = vec![];
-    //     let fitness = *self.fitness;
+        // threadsafe scores vector
+        self.members.par_iter().map(|gene: &Gene| (self.fitness)(&gene.thetas)).collect()
 
-    //     // for every member in the population
-    //     for i in 0..self.size {
-
-    //         // clone thetas for given gene
-    //         let thetas: Vec<f32> = self.members[i as usize].thetas.to_vec();
-
-    //         threads.push(thread::spawn({
-    //             let clone: Arc<Mutex<Vec<f32>>> = Arc::clone(&scores);
-    //             move || {
-    //                 let mut score_clone: MutexGuard<Vec<f32>> = clone.lock().unwrap();
-    //                 score_clone.push(fitness(&thetas));
-    //             }
-    //         }));
-    //     }
-    //     for t in threads {
-    //         t.join().unwrap();
-    //     }
-
-    //     // unwrap Arc and unlock mutex. Unwrap will panic if we have any errors.
-    //     let lock = Arc::try_unwrap(scores).unwrap();
-    //     lock.into_inner().unwrap()
-
-    // }
+    }
 
     ///
     fn softmax(&self, scores: &Vec<f32>) -> Vec<f32> {

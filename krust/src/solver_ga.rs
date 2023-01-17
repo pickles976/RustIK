@@ -26,13 +26,13 @@ pub struct IKSolverGA {
     pub loss: f32,
     pub iterations: i32,
 
-    pub population: Option<Population>,
+    pub population: Option<Box<Population>>,
 
 }
 
 impl IKSolverGA {
 
-    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGA {
+    pub fn new(origin: Matrix4<f32>, thetas: Vec<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f32>) -> IKSolverGA {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
@@ -63,8 +63,25 @@ impl IKSolverGA {
 
     }
 
-    pub fn initialize(&self) {
-        let pop: Population = Population::new(100, &self.thetas, self);
+    pub fn set_target(&mut self, target: Matrix4<f32>) {
+
+        self.target = Some(target);
+
+        // use Box ptr to point to heap data (Population)
+        self.population = Some( 
+            Box::new(
+                Population::new(100, self.thetas.to_vec(), 
+                    // copy in values to avoid lifetime constraints
+                    self.generate_fitness(
+                        self.origin, 
+                        self.axes.to_vec(), 
+                        self.radii.to_vec(), 
+                        self.target.unwrap(), 
+                        self.arm_length)
+                    )
+                )
+            );
+
     }
 
     /// Generate mats and update end-effector position/loss for the given configuration
@@ -77,9 +94,10 @@ impl IKSolverGA {
         self.loss = self.calculate_loss(&self.end_effector);
     }
 
+    ///
     fn update_thetas(&mut self) {
-        self.population.unwrap().new_generation();
-        self.thetas = self.population.unwrap().alpha.as_ref().unwrap().to_vec();
+        self.population.as_mut().unwrap().new_generation();
+        self.thetas = self.population.as_ref().unwrap().alpha.as_ref().unwrap().to_vec();
     }
 
     /// Update learning parameters
@@ -124,19 +142,28 @@ impl IKSolverGA {
         self.loss = 100.0;
     }
 
-    // Generates the fitness function with custom injected values
-    pub fn fitness(&self, thetas: &Vec<f32>) -> f32 {
+    /// Generate a threadsafe fitness evaluation function for a given member of the population
+    pub fn generate_fitness(&self, origin: Matrix4<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f32>, target: Matrix4<f32>, arm_length: f32) -> Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static> {
 
-            // 
-            let mats: Vec<Matrix4<f32>> = generate_matrices(self.origin, thetas, &self.axes, &self.radii);
+        let _axes: Vec<Vector3<f32>> = axes.to_vec();
+        let _origin: Matrix4<f32> = origin.clone();
+        let _radii: Vec<f32> = radii.to_vec();
+        let _target: Matrix4<f32> = target.clone();
+
+        let closure = move |thetas: &Vec<f32>| -> f32 {
+
+            let mats: Vec<Matrix4<f32>> = generate_matrices(_origin, thetas, &_axes, &_radii);
             let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
             let end_effector: Matrix4<f32> = forward_mats[forward_mats.len() - 1];
 
             let mut total: f32 = 0.0;
 
-            total += distance_loss(&end_effector, self.target, self.arm_length);
+            total += distance_loss(&end_effector, &_target, arm_length);
     
             1.0 / total
+        };
+
+        Box::new(closure)
 
     }
 
