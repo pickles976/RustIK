@@ -1,3 +1,5 @@
+
+## MVP
 - [x] Try out the nalgebra library
 - [x] Add testing for generating transform matrices
 - [x] Create function to generate vec of matrices from vecs of specs
@@ -26,11 +28,16 @@
 - [ ] Move Vector clone calls into IKSolverGA constructor
 - [ ] Remove references from IKSolverGD constructor
 - [ ] Add base class for Solver (shared traits)
-- [ ] Learn how to actually do threading efficiently
 - [ ] Re-organize library to only expose solvers
+
+# Use in browser
 - [ ] Export WASM
 - [ ] Use in browser
+
+# GPU acceleration
 - [ ] do small WebGPU Rust project
 - [ ] Add GPGPU compute to GA Solver
+
+# Constraints
 - [ ] Add angle constraints
 - [ ] Add collision constraints
