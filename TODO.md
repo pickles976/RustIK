@@ -23,16 +23,16 @@
 - [x] Fix the circular reference issue with the population/solver references
 - [x] Add threading with rayon
 - [x] Add GA Solver
-- [ ] Test GA Solver
-- [ ] Add set_target() method to GD solver, consolidate reset params method?
+- [x] Test GA Solver
 - [ ] Move Vector clone calls into IKSolverGA constructor
 - [ ] Remove references from IKSolverGD constructor
-- [ ] Add base class for Solver (shared traits)
-- [ ] Re-organize library to only expose solvers
 
 # Use in browser
-- [ ] Export WASM
-- [ ] Use in browser
+- [x] Export WASM
+- [x] Use in browser
+- [ ] Allow user to control precision of solution
+- [ ] Add serialization of arm class?
+- [ ] Add serialization of 3D objects
 
 # GPU acceleration
 - [ ] do small WebGPU Rust project
