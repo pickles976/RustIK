@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>hello-wasm example</title>
+    <script src="https://pagecdn.io/lib/mathjs/11.0.1/math.min.js" crossorigin="anonymous"  ></script>
+  </head>
+  <body>
+    <script type="module">
+      import init, { solve_gd } from "./pkg/krust.js";
+
+      const ANGLES = [0, 0, 0, 0, 0, 0]
+      const AXES = ["x", "x", "x", "x", "x", "x"]
+      const RADII = [2, 2, 2, 2, 2, 2]
+
+      const TARGET = math.matrix([
+          [1, 0, 0, 0],
+          [0, 1, 0, 4],
+          [0, 0, 1, 5],
+          [0, 0, 0, 1]
+      ])
+
+      const ORIGIN = math.matrix([
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+          [0, 0, 1, 0],
+          [0, 0, 0, 1]
+      ])
+
+      function to_array(in_matrix) {
+          let dim = in_matrix.size()
+
+          let arr = []
+
+          for (let i = 0; i < dim[0]; i++) {
+              for (let j = 0; j < dim[1]; j++) {
+                  arr.push(in_matrix.get([j, i]))
+              }
+          }
+
+          return arr
+      }
+
+      let start = Date.now();
+      init().then(() => {
+        let thetas = solve_gd(to_array(TARGET), to_array(ORIGIN), ANGLES, AXES, RADII);
+        console.log(thetas)
+      });
+      console.log(`Elapsed time: ${Date.now() - start}`)
+    </script>
+  </body>
+</html>

@@ -72,14 +72,15 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
-        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
+        println!("Axes: {:?}", TARGET);
 
-        ik_solver.target = Some(TARGET);
+        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
 
         let start = Instant::now();
         ik_solver.solve(TARGET, 0.000000001);
         let duration = start.elapsed();
         println!("Elapsed time: {:?}", duration);
+        println!("Thetas: {:?}", ik_solver.thetas);
     }
 
 }

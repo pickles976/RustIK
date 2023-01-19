@@ -12,13 +12,18 @@ pub mod genetics;
 use solver_gd::IKSolverGD;
 
 #[wasm_bindgen]
+extern {
+    pub fn alert(s: &str);
+}
+
+#[wasm_bindgen]
 pub fn solve_gd(target_array: Array, origin_array: Array, angles_array: Array, axes_array: Array, radii_array: Array) -> js_sys::Float32Array {
 
     let _target: Matrix4<f32> = js_array_to_matrix(target_array);
     let _origin: Matrix4<f32> = js_array_to_matrix(origin_array);
     let angles_vec: Vec<f32> = js_array_to_vec_f32(angles_array);
-    let radii_vec: Vec<f32> = js_array_to_vec_f32(radii_array);
     let axes_vec: Vec<Vector3<f32>> = js_array_to_vector3(axes_array);
+    let radii_vec: Vec<f32> = js_array_to_vec_f32(radii_array);
 
     let mut ik_solver: IKSolverGD = IKSolverGD::new(_origin, &angles_vec, &axes_vec, &radii_vec);
     ik_solver.solve(_target, 0.000000001);
