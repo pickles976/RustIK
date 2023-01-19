@@ -133,7 +133,8 @@ impl IKSolverGA {
 
     /// Calculate loss for the descent
     fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
-        distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
+        // distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
+        transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
 
     // Reset parameters between runs
