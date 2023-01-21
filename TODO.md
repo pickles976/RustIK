@@ -25,6 +25,9 @@
 - [x] Add GA Solver
 - [x] Test GA Solver
 - [x] Move Vector clone calls into IKSolverGA constructor
+- [ ] Switch to f64
+- [ ] Add ncollide CollisionManager class
+
 
 # Use in browser
 - [x] Export WASM
@@ -32,9 +35,8 @@
 - [x] Allow user to control precision of solution
 - [x] Determine if WASM can store an object in the Rust end
 - [x] Set up persistent state wasm
-- [ ] Add ncollide CollisionManager class
+- [ ] Test basic collision in javascript
 - [ ] Add serialization of cuboids
-- [ ] Add serialization of arm class?
 
 # GPU acceleration
 - [ ] do small WebGPU Rust project

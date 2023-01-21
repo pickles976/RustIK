@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, fmt, sync::{Arc, Mutex, MutexGuard}, thread, cell::RefCell};
+use std::{f32::consts::PI, fmt};
 use rand::{Rng, rngs::ThreadRng};
 use rayon::prelude::*;
 
