@@ -32,7 +32,7 @@ pub struct IKSolverGA {
 
 impl IKSolverGA {
 
-    pub fn new(origin: Matrix4<f32>, thetas: Vec<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f32>) -> IKSolverGA {
+    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGA {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 

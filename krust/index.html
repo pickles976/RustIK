@@ -7,7 +7,7 @@
   </head>
   <body>
     <script type="module">
-      import init, { solve_gd } from "./pkg/krust.js";
+      import init, { InverseKinematics } from "./pkg/krust.js";
 
       const ANGLES = [0, 0, 0, 0, 0, 0]
       const AXES = ["x", "x", "x", "x", "x", "x"]
@@ -41,11 +41,12 @@
           return arr
       }
 
+      await init()
+      let ik_solver = InverseKinematics.new(to_array(ORIGIN), ANGLES, AXES, RADII);
+
       let start = Date.now();
-      init().then(() => {
-        let thetas = solve_gd(to_array(TARGET), to_array(ORIGIN), ANGLES, AXES, RADII);
-        console.log(thetas)
-      });
+      let thetas = ik_solver.solve(to_array(TARGET),  0.0000001)
+      console.log(thetas)
       console.log(`Elapsed time: ${Date.now() - start}`)
     </script>
   </body>

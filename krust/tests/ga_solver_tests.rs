@@ -26,7 +26,7 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        let ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, angles.to_vec(), axes.to_vec(), radii.to_vec());
+        let ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, &angles, &axes, &radii);
 
         assert_eq!(angles, ik_solver.thetas);
         assert_eq!(axes, ik_solver.axes);
@@ -44,7 +44,7 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        IKSolverGA::new(IDENTITY, angles.to_vec(), axes.to_vec(), radii.to_vec());
+        IKSolverGA::new(IDENTITY, &angles, &axes, &radii);
 
     }
 
@@ -55,7 +55,7 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
-        let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, angles.to_vec(), axes.to_vec(), radii.to_vec());
+        let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, &angles, &axes, &radii);
 
         ik_solver.set_target(TARGET);
 
@@ -72,7 +72,7 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
-        let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, angles.to_vec(), axes.to_vec(), radii.to_vec());
+        let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, &angles, &axes, &radii);
 
         let start = Instant::now();
         ik_solver.solve(TARGET, 0.000000001);

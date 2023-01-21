@@ -24,15 +24,17 @@
 - [x] Add threading with rayon
 - [x] Add GA Solver
 - [x] Test GA Solver
-- [ ] Move Vector clone calls into IKSolverGA constructor
-- [ ] Remove references from IKSolverGD constructor
+- [x] Move Vector clone calls into IKSolverGA constructor
 
 # Use in browser
 - [x] Export WASM
 - [x] Use in browser
-- [ ] Allow user to control precision of solution
+- [x] Allow user to control precision of solution
+- [x] Determine if WASM can store an object in the Rust end
+- [x] Set up persistent state wasm
+- [ ] Add ncollide CollisionManager class
+- [ ] Add serialization of cuboids
 - [ ] Add serialization of arm class?
-- [ ] Add serialization of 3D objects
 
 # GPU acceleration
 - [ ] do small WebGPU Rust project
