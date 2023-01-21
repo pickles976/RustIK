@@ -1,21 +1,21 @@
-use std::{f32::consts::PI, fmt};
+use std::{f64::consts::PI, fmt};
 use rand::{Rng, rngs::ThreadRng};
 use rayon::prelude::*;
 
-const MUTATION_SIZE: f32 = 1.0; // how large a mutation can be
-const MUTATION_RATE: f32 = 0.4;
+const MUTATION_SIZE: f64 = 1.0; // how large a mutation can be
+const MUTATION_RATE: f64 = 0.4;
 
 pub struct Gene {
     
-    pub learn_rate: f32,
-    pub thetas: Vec<f32>,
+    pub learn_rate: f64,
+    pub thetas: Vec<f64>,
     // angle constraints
 
 }
 
 impl Gene {
 
-    pub fn new(thetas: &Vec<f32>, learn_rate: f32) -> Gene {
+    pub fn new(thetas: &Vec<f64>, learn_rate: f64) -> Gene {
         Gene {
             learn_rate: learn_rate,
             thetas: thetas.to_vec(),
@@ -29,8 +29,8 @@ impl Gene {
         let mut rng: ThreadRng = rand::thread_rng();
 
         // crossover
-        let repr: Vec<f32> = parent1.thetas.iter().zip(parent2.thetas.iter()).map(|(theta_1, theta_2)| {
-            let new_theta: f32 = if rng.gen::<f32>() > 0.5 {*theta_1} else {*theta_2};
+        let repr: Vec<f64> = parent1.thetas.iter().zip(parent2.thetas.iter()).map(|(theta_1, theta_2)| {
+            let new_theta: f64 = if rng.gen::<f64>() > 0.5 {*theta_1} else {*theta_2};
             new_theta
         }).collect();
 
@@ -46,8 +46,8 @@ impl Gene {
         let mut rng: ThreadRng = rand::thread_rng();
 
         for i in 0..self.thetas.len() {
-            if rng.gen::<f32>() < MUTATION_RATE {
-                self.thetas[i] += MUTATION_SIZE * PI * (rng.gen::<f32>() - 0.5);
+            if rng.gen::<f64>() < MUTATION_RATE {
+                self.thetas[i] += MUTATION_SIZE * PI * (rng.gen::<f64>() - 0.5);
                 // clamp to constraints
             } 
         }
@@ -64,19 +64,19 @@ impl fmt::Display for Gene {
 pub struct Population {
 
     // fitness function,
-    fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>,
+    fitness: Box<dyn Fn(&Vec<f64>) -> f64 + Send + Sync + 'static>,
 
     pub size: i32,
     pub generation: i32,
-    pub alpha: Option<Vec<f32>>,
-    pub min_err: f32,
+    pub alpha: Option<Vec<f64>>,
+    pub min_err: f64,
     members: Vec<Gene>,
 
 }
 
 impl Population {
 
-    pub fn new(size: i32, thetas: Vec<f32>, fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>) -> Population {
+    pub fn new(size: i32, thetas: Vec<f64>, fitness: Box<dyn Fn(&Vec<f64>) -> f64 + Send + Sync + 'static>) -> Population {
 
         let mut first_gen: Vec<Gene> = Vec::new();
 
@@ -89,7 +89,7 @@ impl Population {
             size: size,
             generation: 0,
             alpha: None,
-            min_err: f32::MAX,
+            min_err: f64::MAX,
             members: first_gen,
         }
 
@@ -100,9 +100,9 @@ impl Population {
         self.generation += 1;
         
         // softmax scores
-        let scores: Vec<f32> = self.get_scores();
-        // let scores: Vec<f32> = self.get_scores_threaded();
-        let softmax: Vec<f32> = self.softmax(&scores);
+        let scores: Vec<f64> = self.get_scores();
+        // let scores: Vec<f64> = self.get_scores_threaded();
+        let softmax: Vec<f64> = self.softmax(&scores);
 
         // get population member with highest fitness
         let index = self.argmax(&softmax);
@@ -126,7 +126,7 @@ impl Population {
     }
 
     ///
-    fn get_scores(&self) -> Vec<f32>{
+    fn get_scores(&self) -> Vec<f64>{
 
         let scores = self.members.iter().map(|gene: &Gene| {
             return (*self.fitness)(&gene.thetas);
@@ -135,7 +135,7 @@ impl Population {
         scores
     }
 
-    fn get_scores_threaded(&self) -> Vec<f32> {
+    fn get_scores_threaded(&self) -> Vec<f64> {
 
         // threadsafe scores vector
         self.members.par_iter().map(|gene: &Gene| (self.fitness)(&gene.thetas)).collect()
@@ -143,13 +143,13 @@ impl Population {
     }
 
     ///
-    fn softmax(&self, scores: &Vec<f32>) -> Vec<f32> {
-        let sum: f32 = scores.iter().sum();
-        scores.iter().map(|score: &f32| score / sum).collect()
+    fn softmax(&self, scores: &Vec<f64>) -> Vec<f64> {
+        let sum: f64 = scores.iter().sum();
+        scores.iter().map(|score: &f64| score / sum).collect()
     }
 
     ///
-    fn argmax(&self, scores: &Vec<f32>) -> usize {
+    fn argmax(&self, scores: &Vec<f64>) -> usize {
         scores
         .iter()
         .enumerate()
@@ -159,14 +159,14 @@ impl Population {
     }
 
     ///
-    fn pick_parent(&self, scores: &Vec<f32>) -> &Gene {
+    fn pick_parent(&self, scores: &Vec<f64>) -> &Gene {
 
         let mut rng: ThreadRng = rand::thread_rng();
-        let mut thresh: f32 = 0.0;
+        let mut thresh: f64 = 0.0;
 
         for i in 0..self.size {
             thresh += scores[i as usize];
-            if thresh > rng.gen::<f32>() {
+            if thresh > rng.gen::<f64>() {
                 return &self.members[i as usize]
             }
         }

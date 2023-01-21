@@ -1,35 +1,35 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
-use std::{fmt, f32::consts::PI};
+use std::{fmt, f64::consts::PI};
 use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self};
 
-const ROT_CORRECTION: f32 = PI;
-const MAX_D_LOSS: f32 = 0.5;
+const ROT_CORRECTION: f64 = PI;
+const MAX_D_LOSS: f64 = 0.5;
 const MAX_STEPS: i32 = 250;
 
 pub struct IKSolverGD {
 
-    pub axes: Vec<Vector3<f32>>,
-    pub radii: Vec<f32>,
-    pub thetas: Vec<f32>,
-    pub origin: Matrix4<f32>, 
+    pub axes: Vec<Vector3<f64>>,
+    pub radii: Vec<f64>,
+    pub thetas: Vec<f64>,
+    pub origin: Matrix4<f64>, 
 
-    pub arm_length: f32,
-    pub end_effector: Matrix4<f32>,
-    pub target: Option<Matrix4<f32>>,
+    pub arm_length: f64,
+    pub end_effector: Matrix4<f64>,
+    pub target: Option<Matrix4<f64>>,
 
-    pub mats: Vec<Matrix4<f32>>,
-    pub forward_mats: Vec<Matrix4<f32>>,
-    pub backward_mats: Vec<Matrix4<f32>>,
+    pub mats: Vec<Matrix4<f64>>,
+    pub forward_mats: Vec<Matrix4<f64>>,
+    pub backward_mats: Vec<Matrix4<f64>>,
 
-    pub loss: f32,
+    pub loss: f64,
     pub iterations: i32,
 
-    learn_rate: f32,
-    current_learn_rate: f32,
-    decay: f32,
-    momentums: Vec<f32>,
-    momentum_retain: f32,
+    learn_rate: f64,
+    current_learn_rate: f64,
+    decay: f64,
+    momentums: Vec<f64>,
+    momentum_retain: f64,
 
 }
 
@@ -37,14 +37,14 @@ pub struct IKSolverGD {
 /// Uses gradient descent to solve IK for a given target position
 impl IKSolverGD {
 
-    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGD {
+    pub fn new(origin: Matrix4<f64>, thetas: &Vec<f64>, axes: &Vec<Vector3<f64>>, radii: &Vec<f64>) -> IKSolverGD {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
         "Vector lengths unequal! angles: {}, axes: {}, radii: {}", thetas.len(), axes.len(), radii.len());
 
         // Generate the matrices to avoid Option<> for matrix types
-        let matrices: Vec<Matrix4<f32>> = generate_matrices(origin, &thetas, &axes, &radii);
+        let matrices: Vec<Matrix4<f64>> = generate_matrices(origin, &thetas, &axes, &radii);
 
         IKSolverGD {
             origin: origin,
@@ -84,16 +84,16 @@ impl IKSolverGD {
     /// Perform a gradient descent step to update arm angles
     fn update_thetas(&mut self) {
 
-        let d: f32 = 0.00001;
+        let d: f64 = 0.00001;
 
         for i in 0..self.thetas.len() {
 
-            let d_theta: f32 = self.thetas[i] + d;
-            let radius: f32 = self.radii[i];
-            let axis: Vector3<f32> = self.axes[i];
-            let d_mat: Matrix4<f32> = transform_matrix(d_theta, &axis, &Vector3::new(0.0,0.0,radius));
+            let d_theta: f64 = self.thetas[i] + d;
+            let radius: f64 = self.radii[i];
+            let axis: Vector3<f64> = self.axes[i];
+            let d_mat: Matrix4<f64> = transform_matrix(d_theta, &axis, &Vector3::new(0.0,0.0,radius));
 
-            let delta_end_effector: Matrix4<f32> = (self.forward_mats[i] * d_mat) * self.backward_mats[i + 2];
+            let delta_end_effector: Matrix4<f64> = (self.forward_mats[i] * d_mat) * self.backward_mats[i + 2];
 
             let d_loss = (self.calculate_loss(&delta_end_effector) - self.loss) / d;
 
@@ -112,7 +112,7 @@ impl IKSolverGD {
     /// Update learning parameters
     fn update_params(&mut self) {
         self.iterations += 1;
-        self.current_learn_rate = self.learn_rate * (1.0 / (1.0 + self.decay * self.iterations as f32));
+        self.current_learn_rate = self.learn_rate * (1.0 / (1.0 + self.decay * self.iterations as f64));
     }
 
     pub fn update(&mut self) {
@@ -121,7 +121,7 @@ impl IKSolverGD {
         self.update_params();
     }
 
-    pub fn solve(&mut self, target: Matrix4<f32>, thresh: f32) {
+    pub fn solve(&mut self, target: Matrix4<f64>, thresh: f64) {
 
         self.target = Some(target);
         self.reset_params();
@@ -142,7 +142,7 @@ impl IKSolverGD {
     }
 
     /// Calculate loss for the descent
-    fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
+    fn calculate_loss(&self, end_effector: &Matrix4<f64>) -> f64 {
         // distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
         transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
