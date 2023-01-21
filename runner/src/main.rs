@@ -6,23 +6,23 @@ use krust::solver_ga::IKSolverGA;
 fn main() {
     println!("Hello, world!");
 
-    const TARGET: Matrix4<f64> = Matrix4::new(  
+    const TARGET: Matrix4<f32> = Matrix4::new(  
         1.0,0.0,0.0,0.0,
         0.0,1.0,0.0,3.0,
         0.0,0.0,1.0,3.0,
         0.0,0.0,0.0,1.0  
     );
 
-    const IDENTITY: Matrix4<f64> = Matrix4::new(  
+    const IDENTITY: Matrix4<f32> = Matrix4::new(  
         1.0,0.0,0.0,0.0,
         0.0,1.0,0.0,0.0,
         0.0,0.0,1.0,0.0,
         0.0,0.0,0.0,1.0  
     );
 
-    let angles: Vec<f64> = vec![0.0,0.0,0.0];
-    let axes: Vec<Vector3<f64>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
-    let radii: Vec<f64> = vec![2.0,2.0,2.0];
+    let angles: Vec<f32> = vec![0.0,0.0,0.0];
+    let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
+    let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
     let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, angles.to_vec(), axes.to_vec(), radii.to_vec());
 

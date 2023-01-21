@@ -10,8 +10,8 @@ mod genetics_tests {
     #[test]
     fn test_gene_crossover() {
 
-        let thetas: Vec<f64> = vec![0.0, 1.0, 2.0];
-        let learn_rate: f64 = 0.5;
+        let thetas: Vec<f32> = vec![0.0, 1.0, 2.0];
+        let learn_rate: f32 = 0.5;
 
         let gene_1: Gene = Gene::new(&thetas, learn_rate);
         let gene_2: Gene = Gene::new(&thetas, learn_rate);
@@ -39,17 +39,17 @@ mod genetics_tests {
     #[test]
     fn test_population() {
 
-        let thetas: Vec<f64> = vec![5.0, 5.0, 5.0, 5.0];
+        let thetas: Vec<f32> = vec![5.0, 5.0, 5.0, 5.0];
 
         // fitness function measures closeness to this thing
-        let closure = move |thetas: &Vec<f64>| -> f64 {
+        let closure = move |thetas: &Vec<f32>| -> f32 {
 
-            let target: Vec<f64> = vec![0.0; thetas.len()];
+            let target: Vec<f32> = vec![0.0; thetas.len()];
 
-            let mut total: f64 = 0.0;
+            let mut total: f32 = 0.0;
 
             for i in 0..target.len() {
-                total += f64::powf(target[i] - thetas[i], 2.0);
+                total += f32::powf(target[i] - thetas[i], 2.0);
             }
 
             1.0 / total

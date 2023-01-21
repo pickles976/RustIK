@@ -1,29 +1,29 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
-use std::{fmt, f64::consts::PI};
+use std::{fmt, f32::consts::PI};
 use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self};
 use crate::genetics::{Population};
 
 
-const ROT_CORRECTION: f64 = PI;
+const ROT_CORRECTION: f32 = PI;
 const MAX_STEPS: i32 = 250;
 
 pub struct IKSolverGA {
 
-    pub axes: Vec<Vector3<f64>>,
-    pub radii: Vec<f64>,
-    pub thetas: Vec<f64>,
-    pub origin: Matrix4<f64>, 
+    pub axes: Vec<Vector3<f32>>,
+    pub radii: Vec<f32>,
+    pub thetas: Vec<f32>,
+    pub origin: Matrix4<f32>, 
 
-    pub arm_length: f64,
-    pub end_effector: Matrix4<f64>,
-    pub target: Option<Matrix4<f64>>,
+    pub arm_length: f32,
+    pub end_effector: Matrix4<f32>,
+    pub target: Option<Matrix4<f32>>,
 
-    pub mats: Vec<Matrix4<f64>>,
-    pub forward_mats: Vec<Matrix4<f64>>,
-    pub backward_mats: Vec<Matrix4<f64>>,
+    pub mats: Vec<Matrix4<f32>>,
+    pub forward_mats: Vec<Matrix4<f32>>,
+    pub backward_mats: Vec<Matrix4<f32>>,
 
-    pub loss: f64,
+    pub loss: f32,
     pub iterations: i32,
 
     pub population: Option<Box<Population>>,
@@ -32,14 +32,14 @@ pub struct IKSolverGA {
 
 impl IKSolverGA {
 
-    pub fn new(origin: Matrix4<f64>, thetas: &Vec<f64>, axes: &Vec<Vector3<f64>>, radii: &Vec<f64>) -> IKSolverGA {
+    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGA {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
         "Vector lengths unequal! angles: {}, axes: {}, radii: {}", thetas.len(), axes.len(), radii.len());
 
         // Generate the matrices to avoid Option<> for matrix types
-        let matrices: Vec<Matrix4<f64>> = generate_matrices(origin, &thetas, &axes, &radii);
+        let matrices: Vec<Matrix4<f32>> = generate_matrices(origin, &thetas, &axes, &radii);
 
         IKSolverGA {
             origin: origin,
@@ -63,7 +63,7 @@ impl IKSolverGA {
 
     }
 
-    pub fn set_target(&mut self, target: Matrix4<f64>) {
+    pub fn set_target(&mut self, target: Matrix4<f32>) {
 
         self.target = Some(target);
 
@@ -111,7 +111,7 @@ impl IKSolverGA {
         self.update_params();
     }
 
-    pub fn solve(&mut self, target: Matrix4<f64>, thresh: f64) {
+    pub fn solve(&mut self, target: Matrix4<f32>, thresh: f32) {
 
         self.set_target(target);
         self.reset_params();
@@ -132,7 +132,7 @@ impl IKSolverGA {
     }
 
     /// Calculate loss for the descent
-    fn calculate_loss(&self, end_effector: &Matrix4<f64>) -> f64 {
+    fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
         // distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
         transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
@@ -144,20 +144,20 @@ impl IKSolverGA {
     }
 
     /// Generate a threadsafe fitness evaluation function for a given member of the population
-    pub fn generate_fitness(&self, origin: Matrix4<f64>, axes: Vec<Vector3<f64>>, radii: Vec<f64>, target: Matrix4<f64>, arm_length: f64) -> Box<dyn Fn(&Vec<f64>) -> f64 + Send + Sync + 'static> {
+    pub fn generate_fitness(&self, origin: Matrix4<f32>, axes: Vec<Vector3<f32>>, radii: Vec<f32>, target: Matrix4<f32>, arm_length: f32) -> Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static> {
 
-        let _axes: Vec<Vector3<f64>> = axes.to_vec();
-        let _origin: Matrix4<f64> = origin.clone();
-        let _radii: Vec<f64> = radii.to_vec();
-        let _target: Matrix4<f64> = target.clone();
+        let _axes: Vec<Vector3<f32>> = axes.to_vec();
+        let _origin: Matrix4<f32> = origin.clone();
+        let _radii: Vec<f32> = radii.to_vec();
+        let _target: Matrix4<f32> = target.clone();
 
-        let closure = move |thetas: &Vec<f64>| -> f64 {
+        let closure = move |thetas: &Vec<f32>| -> f32 {
 
-            let mats: Vec<Matrix4<f64>> = generate_matrices(_origin, thetas, &_axes, &_radii);
-            let forward_mats: Vec<Matrix4<f64>> = generate_forward_matrices(&mats);
-            let end_effector: Matrix4<f64> = forward_mats[forward_mats.len() - 1];
+            let mats: Vec<Matrix4<f32>> = generate_matrices(_origin, thetas, &_axes, &_radii);
+            let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
+            let end_effector: Matrix4<f32> = forward_mats[forward_mats.len() - 1];
 
-            let mut total: f64 = 0.0;
+            let mut total: f32 = 0.0;
 
             total += distance_loss(&end_effector, &_target, arm_length);
     
