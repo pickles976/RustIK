@@ -26,7 +26,10 @@
 - [x] Test GA Solver
 - [x] Move Vector clone calls into IKSolverGA constructor
 - [x] Determine whether to use f32 or f64
+- [ ] Add tests for CollisionManager
 - [ ] Add ncollide CollisionManager class
+- [ ] Pass tests
+- [ ] Add CollisionManager to GA solver
 
 
 # Use in browser
@@ -35,13 +38,14 @@
 - [x] Allow user to control precision of solution
 - [x] Determine if WASM can store an object in the Rust end
 - [x] Set up persistent state wasm
-- [ ] Test basic collision in javascript
 - [ ] Add serialization of cuboids
+- [ ] Export GA solver to wasm
+- [ ] Test GA solver with collision
 
 # GPU acceleration
 - [ ] do small WebGPU Rust project
 - [ ] Add GPGPU compute to GA Solver
 
 # Constraints
-- [ ] Add angle constraints
 - [ ] Add collision constraints
+- [ ] Add angle constraints
