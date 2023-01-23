@@ -40,14 +40,14 @@
 - [x] Allow user to control precision of solution
 - [x] Determine if WASM can store an object in the Rust end
 - [x] Set up persistent state wasm
-- [ ] Add serialization of cuboids
-- [ ] Export GA solver to wasm
-- [ ] Test GA solver with collision
-
-# GPU acceleration
-- [ ] do small WebGPU Rust project
-- [ ] Add GPGPU compute to GA Solver
+- [x] Export GA solver to wasm
+- [x] Test GA solver with collision
+- [ ] Learn to use the Serde library
+- [ ] Add serialization of colliders
 
 # Constraints
-- [ ] Add collision constraints
+- [x] Add collision constraints
 - [ ] Add angle constraints
+
+# Improvements 
+- [ ] Implement collision avoidance jacobian for speedup

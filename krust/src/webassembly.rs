@@ -6,6 +6,11 @@ use na::{Vector3, Matrix4};
 use crate::{solver_gd::IKSolverGD, solver_ga::IKSolverGA, collision_handler::CollisionHandler};
 
 #[wasm_bindgen]
+extern {
+    pub fn alert(s: &str);
+}
+
+#[wasm_bindgen]
 pub struct InverseKinematics {
     ik_solver_jc: IKSolverGD,
     ik_solver_ga: IKSolverGA,
@@ -18,10 +23,15 @@ impl InverseKinematics {
     pub fn new(origin_array: Array, angles_array: Array, axes_array: Array, radii_array: Array, arm_colliders: Array, arm_offsets: Array, world_colliders: Array, world_offsets: Array) -> InverseKinematics {
         let _origin: Matrix4<f32> = js_array_to_matrix(origin_array);
         let angles_vec: Vec<f32> = js_array_to_vec_f32(angles_array);
-        let axes_vec: Vec<Vector3<f32>> = js_array_to_vector3(axes_array);
+        let axes_vec: Vec<Vector3<f32>> = js_array_to_axis(axes_array);
         let radii_vec: Vec<f32> = js_array_to_vec_f32(radii_array);
 
-        let collision_handler: CollisionHandler = CollisionHandler::new(js_array_to_vector3(arm_colliders), js_array_to_vector3(world_colliders), js_array_to_vector3(world_offsets));
+        // alert(&format!("Hello, {:?}!", js_array_to_vector3(arm_colliders)));
+
+
+        // let collision_handler: CollisionHandler = CollisionHandler::new(js_array_to_vector3(arm_colliders), js_array_to_vector3(world_colliders), js_array_to_vector3(world_offsets));
+
+        let collision_handler: CollisionHandler = CollisionHandler::new(vec![], vec![], vec![]);
 
         InverseKinematics {
             ik_solver_jc: IKSolverGD::new(_origin, &angles_vec, &axes_vec, &radii_vec), 
@@ -30,20 +40,21 @@ impl InverseKinematics {
     }
 
     pub fn solve(&mut self, target_array: Array, thresh: f32) -> js_sys::Float32Array {
-        let _target: Matrix4<f32> = js_array_to_matrix(target_array);
+        let target: Matrix4<f32> = js_array_to_matrix(target_array);
 
-        self.ik_solver_ga.solve(_target, 0.1);
+        self.ik_solver_ga.solve(target, 0.1);
 
         self.ik_solver_jc.thetas = self.ik_solver_ga.thetas.to_vec();
+        self.ik_solver_jc.target = Some(target);
         self.ik_solver_jc.update_matrices();
 
-        self.ik_solver_jc.solve(_target, thresh);
+        self.ik_solver_jc.solve(target, thresh);
 
-        return js_sys::Float32Array::from(&self.ik_solver_jc.thetas[..])
+        js_sys::Float32Array::from(&self.ik_solver_jc.thetas[..])
     }
 }
 
-fn js_array_to_vector3(array: Array) -> Vec<Vector3<f32>> {
+fn js_array_to_axis(array: Array) -> Vec<Vector3<f32>> {
 
     js_array_to_vec_str(array).iter().map(|ax| -> Vector3<f32> 
         {
