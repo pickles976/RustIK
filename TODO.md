@@ -26,9 +26,11 @@
 - [x] Test GA Solver
 - [x] Move Vector clone calls into IKSolverGA constructor
 - [x] Determine whether to use f32 or f64
-- [ ] Add tests for CollisionManager
-- [ ] Add ncollide CollisionManager class
-- [ ] Pass tests
+- [x] Add tests for CollisionManager arm collisions
+- [x] Add ncollide CollisionManager class
+- [x] Pass tests
+- [x] Add tests for CollisionManager world collisions
+- [x] pass tests
 - [ ] Add CollisionManager to GA solver
 
 
