@@ -100,8 +100,8 @@ mod solver_tests {
         let obs1: Vector3<f32> = Vector3::new(5.0, 0.5, 2.0);
         let obs2: Vector3<f32> = Vector3::new(5.0, 0.5, 2.0);
 
-        let offset1: Matrix4<f32> = Matrix4::new_translation(&Vector3::new(0.0, 5.0, 2.0));
-        let offset2: Matrix4<f32> = Matrix4::new_translation(&Vector3::new(0.0, 5.0, 10.0));
+        let offset1: Vector3<f32> = Vector3::new(0.0, 5.0, 2.0);
+        let offset2: Vector3<f32> = Vector3::new(0.0, 5.0, 10.0);
 
         // collision handler
         let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![obs1, obs2], vec![offset1, offset2]);
@@ -136,8 +136,8 @@ mod solver_tests {
         let obs1: Vector3<f32> = Vector3::new(5.0, 0.5, 2.0);
         let obs2: Vector3<f32> = Vector3::new(5.0, 0.5, 2.0);
 
-        let offset1: Matrix4<f32> = Matrix4::new_translation(&Vector3::new(0.0, 5.0, 2.0));
-        let offset2: Matrix4<f32> = Matrix4::new_translation(&Vector3::new(0.0, 5.0, 10.0));
+        let offset1: Vector3<f32> = Vector3::new(0.0, 5.0, 2.0);
+        let offset2: Vector3<f32> = Vector3::new(0.0, 5.0, 10.0);
 
         // collision handler
         let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![obs1, obs2], vec![offset1, offset2]);

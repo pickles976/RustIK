@@ -3,32 +3,43 @@ use js_sys::Array;
 
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4};
-use crate::solver_gd::IKSolverGD;
+use crate::{solver_gd::IKSolverGD, solver_ga::IKSolverGA, collision_handler::CollisionHandler};
 
 #[wasm_bindgen]
 pub struct InverseKinematics {
-    ik_solver: IKSolverGD,
+    ik_solver_jc: IKSolverGD,
+    ik_solver_ga: IKSolverGA,
 }
 
 #[wasm_bindgen]
 impl InverseKinematics {
 
     // origin array, angles array, axes array
-    pub fn new(origin_array: Array, angles_array: Array, axes_array: Array, radii_array: Array) -> InverseKinematics {
+    pub fn new(origin_array: Array, angles_array: Array, axes_array: Array, radii_array: Array, arm_colliders: Array, arm_offsets: Array, world_colliders: Array, world_offsets: Array) -> InverseKinematics {
         let _origin: Matrix4<f32> = js_array_to_matrix(origin_array);
         let angles_vec: Vec<f32> = js_array_to_vec_f32(angles_array);
         let axes_vec: Vec<Vector3<f32>> = js_array_to_vector3(axes_array);
         let radii_vec: Vec<f32> = js_array_to_vec_f32(radii_array);
 
+        let collision_handler: CollisionHandler = CollisionHandler::new(js_array_to_vector3(arm_colliders), js_array_to_vector3(world_colliders), js_array_to_vector3(world_offsets));
+
         InverseKinematics {
-            ik_solver: IKSolverGD::new(_origin, &angles_vec, &axes_vec, &radii_vec), 
+            ik_solver_jc: IKSolverGD::new(_origin, &angles_vec, &axes_vec, &radii_vec), 
+            ik_solver_ga: IKSolverGA::new(_origin, &angles_vec, &axes_vec, &radii_vec, collision_handler),
         }
     }
 
     pub fn solve(&mut self, target_array: Array, thresh: f32) -> js_sys::Float32Array {
         let _target: Matrix4<f32> = js_array_to_matrix(target_array);
-        self.ik_solver.solve(_target, thresh);
-        return js_sys::Float32Array::from(&self.ik_solver.thetas[..])
+
+        self.ik_solver_ga.solve(_target, 0.1);
+
+        self.ik_solver_jc.thetas = self.ik_solver_ga.thetas.to_vec();
+        self.ik_solver_jc.update_matrices();
+
+        self.ik_solver_jc.solve(_target, thresh);
+
+        return js_sys::Float32Array::from(&self.ik_solver_jc.thetas[..])
     }
 }
 

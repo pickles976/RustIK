@@ -19,12 +19,12 @@ pub struct CollisionHandler {
 
 impl CollisionHandler{
 
-    pub fn new(arm: Vec<Vector3<f32>>, obstacles: Vec<Vector3<f32>>, obstacle_offsets: Vec<Matrix4<f32>>) -> CollisionHandler {
+    pub fn new(arm: Vec<Vector3<f32>>, obstacles: Vec<Vector3<f32>>, obstacle_offsets: Vec<Vector3<f32>>) -> CollisionHandler {
         CollisionHandler {
             arm_offsets: arm.iter().map(|v| transform_matrix(0.0, &Vector3::z_axis(), &Vector3::new(0.0, 0.0, v.z / 2.0))).collect(),
             arm_colliders: arm.iter().map(|v| Cuboid::new(vector_convert(v))).collect(),
 
-            world_offsets: obstacle_offsets,
+            world_offsets: obstacle_offsets.iter().map(|v| transform_matrix(0.0, &Vector3::z_axis(), &v)).collect(),
             world_colliders: obstacles.iter().map(|v| Cuboid::new(vector_convert(v))).collect(),
         }
     }
