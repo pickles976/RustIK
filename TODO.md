@@ -31,7 +31,7 @@
 - [x] Pass tests
 - [x] Add tests for CollisionManager world collisions
 - [x] pass tests
-- [ ] Add CollisionManager to GA solver
+- [x] Add CollisionManager to GA solver
 
 
 # Use in browser

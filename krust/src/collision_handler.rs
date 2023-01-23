@@ -107,6 +107,18 @@ impl CollisionHandler{
     }
 }
 
+impl Clone for CollisionHandler {
+    fn clone(&self) -> CollisionHandler {
+        CollisionHandler 
+        { 
+            arm_offsets: self.arm_offsets.to_vec(), 
+            arm_colliders: self.arm_colliders.to_vec(), 
+            world_offsets: self.world_offsets.to_vec(), 
+            world_colliders: self.world_colliders.to_vec(), 
+        }
+    }
+} 
+
 fn vector_convert(v: &Vector3<f32>) -> Vector<f32> {
     Vector::new(v.x, v.y, v.z)
 }

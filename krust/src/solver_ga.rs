@@ -1,12 +1,14 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
 use std::{fmt, f32::consts::PI};
+use crate::collision_handler::CollisionHandler;
 use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self};
 use crate::genetics::{Population};
 
 
 const ROT_CORRECTION: f32 = PI;
 const MAX_STEPS: i32 = 250;
+const PENALTY: f32 = 1000.0;
 
 pub struct IKSolverGA {
 
@@ -28,11 +30,13 @@ pub struct IKSolverGA {
 
     pub population: Option<Box<Population>>,
 
+    pub col_handler: CollisionHandler,
+
 }
 
 impl IKSolverGA {
 
-    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGA {
+    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>, col_handler: CollisionHandler) -> IKSolverGA {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
@@ -59,6 +63,7 @@ impl IKSolverGA {
             iterations: 0,
 
             population: None,
+            col_handler: col_handler,
         }
 
     }
@@ -133,7 +138,9 @@ impl IKSolverGA {
 
     /// Calculate loss for the descent
     fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
-        // distance_loss(end_effector, &self.target.unwrap(), self.arm_length)
+        
+        if self.col_handler.is_arm_colliding_self(&self.forward_mats) { return PENALTY }
+
         transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
 
@@ -150,6 +157,7 @@ impl IKSolverGA {
         let _origin: Matrix4<f32> = origin.clone();
         let _radii: Vec<f32> = radii.to_vec();
         let _target: Matrix4<f32> = target.clone();
+        let _col_handler: CollisionHandler = self.col_handler.clone();
 
         let closure = move |thetas: &Vec<f32>| -> f32 {
 
@@ -158,6 +166,9 @@ impl IKSolverGA {
             let end_effector: Matrix4<f32> = forward_mats[forward_mats.len() - 1];
 
             let mut total: f32 = 0.0;
+
+            if _col_handler.is_arm_colliding_self(&forward_mats) { return PENALTY }
+            if _col_handler.is_arm_colliding_world(&forward_mats) { return PENALTY }
 
             total += distance_loss(&end_effector, &_target, arm_length);
     
