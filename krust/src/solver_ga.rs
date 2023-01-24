@@ -90,7 +90,7 @@ impl IKSolverGA {
     }
 
     /// Generate mats and update end-effector position/loss for the given configuration
-    fn update_matrices(&mut self) {
+    pub fn update_matrices(&mut self) {
         self.mats = generate_matrices(self.origin, &self.thetas, &self.axes, &self.radii);
         self.forward_mats = generate_forward_matrices(&self.mats);
         self.backward_mats = generate_backward_matrices(&self.mats);

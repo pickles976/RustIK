@@ -42,12 +42,15 @@
 - [x] Set up persistent state wasm
 - [x] Export GA solver to wasm
 - [x] Test GA solver with collision
-- [ ] Learn to use the Serde library
+- [x] Learn to use the Serde library
 - [ ] Add serialization of colliders
+- [ ] Add Rayon WASM support
+
+https://github.com/GoogleChromeLabs/wasm-bindgen-rayon
 
 # Constraints
-- [x] Add collision constraints
-- [ ] Add angle constraints
+- [ ] Add collision constraints to both solvers
+- [ ] Add angle constraints to both solvers
 
 # Improvements 
 - [ ] Implement collision avoidance jacobian for speedup
