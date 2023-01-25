@@ -81,7 +81,7 @@ impl IKSolverGA {
         // use Box ptr to point to heap data (Population)
         self.population = Some( 
             Box::new(
-                Population::new(100, self.thetas.to_vec(),
+                Population::new(100, self.thetas.to_vec(), self.min_angles.to_vec(), self.max_angles.to_vec(),
                     // copy in values to avoid lifetime constraints
                     self.generate_fitness(
                         self.origin, 

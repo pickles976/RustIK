@@ -15,8 +15,8 @@ mod genetics_tests {
         let max_angles: Vec<f32> = vec![1.0, 1.0, 1.0];
         let learn_rate: f32 = 0.5;
 
-        let gene_1: Gene = Gene::new(&thetas, learn_rate);
-        let gene_2: Gene = Gene::new(&thetas, learn_rate);
+        let gene_1: Gene = Gene::new(&thetas, &min_angles, &max_angles, learn_rate);
+        let gene_2: Gene = Gene::new(&thetas, &min_angles, &max_angles, learn_rate);
 
         assert_eq!(gene_1.thetas, thetas);
         assert_eq!(gene_1.learn_rate, learn_rate);
@@ -59,7 +59,7 @@ mod genetics_tests {
             1.0 / total
         };
 
-        let mut population: Population = Population::new(100, thetas, Box::new(closure));
+        let mut population: Population = Population::new(100, thetas, min_angles, max_angles, Box::new(closure));
 
         let start = Instant::now();
         for i in 0..100 {

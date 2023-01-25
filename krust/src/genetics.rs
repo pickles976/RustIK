@@ -10,15 +10,19 @@ pub struct Gene {
     pub learn_rate: f32,
     pub thetas: Vec<f32>,
     // angle constraints
+    pub min_angles: Vec<f32>,
+    pub max_angles: Vec<f32>,
 
 }
 
 impl Gene {
 
-    pub fn new(thetas: &Vec<f32>, learn_rate: f32) -> Gene {
+    pub fn new(thetas: &Vec<f32>, min_angles: &Vec<f32>, max_angles: &Vec<f32>, learn_rate: f32) -> Gene {
         Gene {
             learn_rate: learn_rate,
             thetas: thetas.to_vec(),
+            min_angles: min_angles.to_vec(),
+            max_angles: max_angles.to_vec(),
         }
     }
 
@@ -36,6 +40,8 @@ impl Gene {
 
         Gene {
             learn_rate: parent1.learn_rate,
+            min_angles: parent1.min_angles.to_vec(),
+            max_angles: parent1.max_angles.to_vec(),
             thetas: repr,
         }
 
@@ -49,6 +55,7 @@ impl Gene {
             if rng.gen::<f32>() < MUTATION_RATE {
                 self.thetas[i] += MUTATION_SIZE * PI * (rng.gen::<f32>() - 0.5);
                 // clamp to constraints
+                self.thetas[i] = self.max_angles[i].min(self.min_angles[i].max(self.thetas[i]));
             } 
         }
     }
@@ -76,12 +83,12 @@ pub struct Population {
 
 impl Population {
 
-    pub fn new(size: i32, thetas: Vec<f32>, fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>) -> Population {
+    pub fn new(size: i32, thetas: Vec<f32>, min_angles: Vec<f32>, max_angles: Vec<f32>, fitness: Box<dyn Fn(&Vec<f32>) -> f32 + Send + Sync + 'static>) -> Population {
 
         let mut first_gen: Vec<Gene> = Vec::new();
 
         for i in 0..size {
-            first_gen.push(Gene::new(&thetas, 0.5));
+            first_gen.push(Gene::new(&thetas, &min_angles, &max_angles, 0.5));
         }
 
         Population {
