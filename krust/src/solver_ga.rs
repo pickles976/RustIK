@@ -7,7 +7,7 @@ use crate::genetics::{Population};
 
 
 const ROT_CORRECTION: f32 = PI;
-const MAX_STEPS: i32 = 250;
+const MAX_STEPS: i32 = 50;
 const PENALTY: f32 = 1000.0;
 
 pub struct IKSolverGA {
@@ -16,6 +16,9 @@ pub struct IKSolverGA {
     pub radii: Vec<f32>,
     pub thetas: Vec<f32>,
     pub origin: Matrix4<f32>, 
+
+    pub min_angles: Vec<f32>,
+    pub max_angles: Vec<f32>,
 
     pub arm_length: f32,
     pub end_effector: Matrix4<f32>,
@@ -36,7 +39,7 @@ pub struct IKSolverGA {
 
 impl IKSolverGA {
 
-    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>, col_handler: CollisionHandler) -> IKSolverGA {
+    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>, min_angles: &Vec<f32>, max_angles: &Vec<f32>, col_handler: CollisionHandler) -> IKSolverGA {
 
         // Make sure arm properties have the same length
         assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
@@ -50,6 +53,9 @@ impl IKSolverGA {
             thetas: thetas.to_vec(),
             axes: axes.to_vec(),
             radii: radii.to_vec(),
+
+            min_angles: min_angles.to_vec(),
+            max_angles: max_angles.to_vec(),
 
             arm_length: radii.iter().sum(),
             end_effector: matrices[matrices.len() - 1],

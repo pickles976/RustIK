@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate approx; // For the macro relative_eq!
 extern crate nalgebra as na;
-use std::time::{Duration, Instant};
 
 #[cfg(test)]
 mod solver_tests {
 
+    use krust::collision_handler::CollisionHandler;
     use na::{Vector3, Matrix4};
     use std::time::Instant;
     use krust::matrices::{IDENTITY};
@@ -26,7 +26,12 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        let ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
+        let min_angles: Vec<f32> = vec![-100.0, -100.0, -100.0];
+        let max_angles: Vec<f32> = vec![100.0, 100.0, 100.0];
+
+        let collision_handler: CollisionHandler = CollisionHandler::new(&vec![], &vec![], &vec![]);
+
+        let ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii, &min_angles, &max_angles, collision_handler);
 
         assert_eq!(angles, ik_solver.thetas);
         assert_eq!(axes, ik_solver.axes);
@@ -44,7 +49,12 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::y_axis(), *Vector3::z_axis()];
         let radii: Vec<f32> = vec![5.0,3.0,1.0];
 
-        IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
+        let min_angles: Vec<f32> = vec![-100.0, -100.0, -100.0];
+        let max_angles: Vec<f32> = vec![100.0, 100.0, 100.0];
+
+        let collision_handler: CollisionHandler = CollisionHandler::new(&vec![], &vec![], &vec![]);
+
+        IKSolverGD::new(IDENTITY, &angles, &axes, &radii, &min_angles, &max_angles, collision_handler);
 
     }
 
@@ -55,7 +65,12 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
-        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
+        let min_angles: Vec<f32> = vec![-100.0, -100.0, -100.0];
+        let max_angles: Vec<f32> = vec![100.0, 100.0, 100.0];
+
+        let collision_handler: CollisionHandler = CollisionHandler::new(&vec![], &vec![], &vec![]);
+
+        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii, &min_angles, &max_angles, collision_handler);
 
         ik_solver.target = Some(TARGET);
 
@@ -72,9 +87,12 @@ mod solver_tests {
         let axes: Vec<Vector3<f32>> = vec![*Vector3::x_axis(), *Vector3::x_axis(), *Vector3::x_axis()];
         let radii: Vec<f32> = vec![2.0,2.0,2.0];
 
-        println!("Axes: {:?}", TARGET);
+        let min_angles: Vec<f32> = vec![-100.0, -100.0, -100.0];
+        let max_angles: Vec<f32> = vec![100.0, 100.0, 100.0];
 
-        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&vec![], &vec![], &vec![]);
+
+        let mut ik_solver: IKSolverGD = IKSolverGD::new(IDENTITY, &angles, &axes, &radii, &min_angles, &max_angles, collision_handler);
 
         let start = Instant::now();
         ik_solver.solve(TARGET, 0.000000001);

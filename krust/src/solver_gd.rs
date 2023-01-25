@@ -1,11 +1,19 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
 use std::{fmt, f32::consts::PI};
-use crate::matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self};
+use crate::{matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self}, collision_handler::CollisionHandler};
+use fxhash::FxHashMap;
+use std::collections::HashMap;
 
 const ROT_CORRECTION: f32 = PI;
 const MAX_D_LOSS: f32 = 0.5;
-const MAX_STEPS: i32 = 250;
+const MAX_STEPS: i32 = 50;
+
+#[derive(Eq, PartialEq, Hash, Clone)]
+struct Key{
+    index: usize,
+    angle: i32,
+}
 
 pub struct IKSolverGD {
 
@@ -13,6 +21,9 @@ pub struct IKSolverGD {
     pub radii: Vec<f32>,
     pub thetas: Vec<f32>,
     pub origin: Matrix4<f32>, 
+
+    pub min_angles: Vec<f32>,
+    pub max_angles: Vec<f32>,
 
     pub arm_length: f32,
     pub end_effector: Matrix4<f32>,
@@ -31,17 +42,20 @@ pub struct IKSolverGD {
     momentums: Vec<f32>,
     momentum_retain: f32,
 
+    pub collision_handler: CollisionHandler,
+    // mat_cache: FxHashMap<Key, Matrix4<f32>>,
+
 }
 
 /// The base Solver class. 
-/// Uses gradient descent to solve IK for a given target position
+/// Uses gradient descent/optimization to solve IK for a given target position
 impl IKSolverGD {
 
-    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>) -> IKSolverGD {
+    pub fn new(origin: Matrix4<f32>, thetas: &Vec<f32>, axes: &Vec<Vector3<f32>>, radii: &Vec<f32>, min_angles: &Vec<f32>, max_angles: &Vec<f32>, col_handler: CollisionHandler) -> IKSolverGD {
 
         // Make sure arm properties have the same length
-        assert!(thetas.len() == axes.len() && thetas.len() == radii.len(), 
-        "Vector lengths unequal! angles: {}, axes: {}, radii: {}", thetas.len(), axes.len(), radii.len());
+        assert!(thetas.len() == axes.len() && thetas.len() == radii.len() && thetas.len() == min_angles.len() && thetas.len() == max_angles.len(), 
+        "Vector lengths unequal! angles: {}, axes: {}, radii: {}, min angles: {}, max angles: {}", thetas.len(), axes.len(), radii.len(), min_angles.len(), max_angles.len());
 
         // Generate the matrices to avoid Option<> for matrix types
         let matrices: Vec<Matrix4<f32>> = generate_matrices(origin, &thetas, &axes, &radii);
@@ -51,6 +65,9 @@ impl IKSolverGD {
             thetas: thetas.to_vec(),
             axes: axes.to_vec(),
             radii: radii.to_vec(),
+
+            min_angles: min_angles.to_vec(),
+            max_angles: max_angles.to_vec(),
 
             arm_length: radii.iter().sum(),
             end_effector: matrices[matrices.len() - 1],
@@ -68,6 +85,9 @@ impl IKSolverGD {
             decay: 0.000005,
             momentums: vec![0.0; thetas.len()],
             momentum_retain: 0.25,
+            
+            collision_handler: col_handler,
+            // mat_cache: FxHashMap::default()
         }
     }
 
@@ -95,16 +115,36 @@ impl IKSolverGD {
 
             let delta_end_effector: Matrix4<f32> = (self.forward_mats[i] * d_mat) * self.backward_mats[i + 2];
 
-            let d_loss = (self.calculate_loss(&delta_end_effector) - self.loss) / d;
+            let d_loss: f32 = (self.calculate_loss(&delta_end_effector) - self.loss) / d;
 
             // clamp d_loss
-            let d_loss = clamp(d_loss, -MAX_D_LOSS, MAX_D_LOSS);
+            let d_loss: f32 = clamp(d_loss, -MAX_D_LOSS, MAX_D_LOSS);
 
             // momentum
-            let nudge = (self.momentums[i] * self.momentum_retain) + (d_loss * self.learn_rate);
+            let nudge: f32 = (self.momentums[i] * self.momentum_retain) + (d_loss * self.learn_rate);
 
-            self.thetas[i] -= nudge;
-            self.momentums[i] = nudge;
+            let mut new_thetas: Vec<f32> = self.thetas.to_vec();
+            new_thetas[i] -= nudge;
+
+            // check angle constraints
+            if new_thetas[i] > self.min_angles[i] && new_thetas[i] < self.max_angles[i]
+            {
+
+                // TODO: optimize
+                let mats: Vec<Matrix4<f32>> = generate_matrices(self.origin, &new_thetas, &self.axes, &self.radii);
+                let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
+
+                
+                // check collision constraints
+                if !self.collision_handler.is_arm_colliding_self(&forward_mats) && !self.collision_handler.is_arm_colliding_world(&forward_mats) {
+                    self.thetas[i] -= nudge;
+                    self.momentums[i] = nudge;
+                } else {
+                    self.thetas[i] += nudge;
+                    self.momentums[i] = -nudge;
+                }
+            }
+
         }
 
     }

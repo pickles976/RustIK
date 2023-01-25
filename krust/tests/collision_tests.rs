@@ -6,7 +6,6 @@ mod solver_tests {
     use krust::collision_handler::CollisionHandler;
     use na::{Vector3, Matrix4};
     use krust::matrices::{IDENTITY, generate_matrices, generate_forward_matrices};
-    use nalgebra::Vector;
     
     #[test]
     fn test_arm_collisions_true() {
@@ -18,7 +17,7 @@ mod solver_tests {
 
         let arm: Vec<Vector3<f32>> = radii.iter().map(|length| Vector3::new(0.6, 0.6, *length / 2.0)).collect();
 
-        let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![], vec![]);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&arm, &vec![], &vec![]);
 
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
@@ -38,7 +37,7 @@ mod solver_tests {
 
         let arm: Vec<Vector3<f32>> = radii.iter().map(|length| Vector3::new(0.6, 0.6, *length / 2.0)).collect();
 
-        let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![], vec![]);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&arm, &vec![], &vec![]);
 
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
@@ -66,7 +65,7 @@ mod solver_tests {
         let offset2: Vector3<f32> = Vector3::new(0.0, 5.0, 10.0);
 
         // collision handler
-        let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![obs1, obs2], vec![offset1, offset2]);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&arm, &vec![obs1, obs2], &vec![offset1, offset2]);
 
         // configure arm position
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
@@ -95,7 +94,7 @@ mod solver_tests {
         let offset2: Vector3<f32> = Vector3::new(0.0, 5.0, 10.0);
 
         // collision handler
-        let collision_handler: CollisionHandler = CollisionHandler::new(arm, vec![obs1, obs2], vec![offset1, offset2]);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&arm, &vec![obs1, obs2], &vec![offset1, offset2]);
 
         // configure arm position
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);

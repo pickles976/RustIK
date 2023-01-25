@@ -35,8 +35,6 @@ pub struct InverseKinematics {
 #[wasm_bindgen]
 impl InverseKinematics {
 
-    // origin array, angles array, axes array
-    // TODO: turn this into a struct
     pub fn new(field_str: &str) -> InverseKinematics {
 
         // TODO: something here to let the user know what failed if we didn't get good values in
@@ -44,12 +42,11 @@ impl InverseKinematics {
 
         // alert(&format!("{:?}", fields));
 
-        // let collision_handler: CollisionHandler = CollisionHandler::new(vec![], vec![], vec![]);
-        let collision_handler: CollisionHandler = CollisionHandler::new(fields.arm_half_extents, fields.world_half_extents,fields. world_offsets);
+        let collision_handler: CollisionHandler = CollisionHandler::new(&fields.arm_half_extents, &fields.world_half_extents, &fields. world_offsets);
 
         InverseKinematics {
-            ik_solver_gd: IKSolverGD::new(fields.origin, &fields.thetas, &fields.axes, &fields.radii), 
-            ik_solver_ga: IKSolverGA::new(fields.origin, &fields.thetas, &fields.axes, &fields.radii, collision_handler), 
+            ik_solver_gd: IKSolverGD::new(fields.origin, &fields.thetas, &fields.axes, &fields.radii, &fields.min_angles, &fields.max_angles, collision_handler.clone()), 
+            ik_solver_ga: IKSolverGA::new(fields.origin, &fields.thetas, &fields.axes, &fields.radii, &fields.min_angles, &fields.max_angles, collision_handler.clone()), 
         }
     }
 
