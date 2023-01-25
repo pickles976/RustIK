@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 const ROT_CORRECTION: f32 = PI;
 const MAX_D_LOSS: f32 = 0.5;
-const MAX_STEPS: i32 = 50;
+const MAX_STEPS: i32 = 10;
 
 #[derive(Eq, PartialEq, Hash, Clone)]
 struct Key{
