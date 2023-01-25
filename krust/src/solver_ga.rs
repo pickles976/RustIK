@@ -145,8 +145,8 @@ impl IKSolverGA {
     /// Calculate loss for the descent
     fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
         
-        if self.col_handler.is_arm_colliding_self(&self.forward_mats) { return 1.0 /PENALTY }
-        if self.col_handler.is_arm_colliding_world(&self.forward_mats) { return 1.0 /PENALTY }
+        if self.col_handler.is_arm_colliding_self_naive(&self.forward_mats) { return 1.0 /PENALTY }
+        if self.col_handler.is_arm_colliding_world_naive(&self.forward_mats) { return 1.0 /PENALTY }
 
         transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
@@ -174,8 +174,8 @@ impl IKSolverGA {
 
             let mut total: f32 = 0.0;
 
-            if _col_handler.is_arm_colliding_self(&forward_mats) { return 1.0 / PENALTY }
-            if _col_handler.is_arm_colliding_world(&forward_mats) { return 1.0 / PENALTY }
+            if _col_handler.is_arm_colliding_self_naive(&forward_mats) { return 1.0 / PENALTY }
+            if _col_handler.is_arm_colliding_world_naive(&forward_mats) { return 1.0 / PENALTY }
 
             total += transform_loss(&end_effector, &_target, arm_length, ROT_CORRECTION);
     

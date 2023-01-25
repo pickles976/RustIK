@@ -106,6 +106,9 @@ impl IKSolverGD {
 
         let d: f32 = 0.00001;
 
+        // store matrices for optimization
+        let mut mats: Vec<Matrix4<f32>> = self.mats.clone();
+
         for i in 0..self.thetas.len() {
 
             let d_theta: f32 = self.thetas[i] + d;
@@ -130,13 +133,12 @@ impl IKSolverGD {
             if new_thetas[i] > self.min_angles[i] && new_thetas[i] < self.max_angles[i]
             {
 
-                // TODO: optimize
-                let mats: Vec<Matrix4<f32>> = generate_matrices(self.origin, &new_thetas, &self.axes, &self.radii);
+                mats[i + 1] = transform_matrix(new_thetas[i], &axis, &Vector3::new(0.0,0.0,radius));
                 let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
-
+                mats[i + 1] = self.mats[i + 1];
                 
                 // check collision constraints
-                if !self.collision_handler.is_arm_colliding_self(&forward_mats) && !self.collision_handler.is_arm_colliding_world(&forward_mats) {
+                if !self.collision_handler.is_arm_colliding_self(i, &forward_mats) && !self.collision_handler.is_arm_colliding_world(i, &forward_mats) {
                     self.thetas[i] -= nudge;
                     self.momentums[i] = nudge;
                 } else {

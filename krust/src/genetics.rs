@@ -9,7 +9,6 @@ pub struct Gene {
     
     pub learn_rate: f32,
     pub thetas: Vec<f32>,
-    // angle constraints
     pub min_angles: Vec<f32>,
     pub max_angles: Vec<f32>,
 

@@ -22,7 +22,7 @@ mod solver_tests {
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
 
-        assert_eq!(collision_handler.is_arm_colliding_self(&forward_mats), true);
+        assert_eq!(collision_handler.is_arm_colliding_self_naive(&forward_mats), true);
         assert_eq!(collision_handler.find_arm_collisions_self(&forward_mats), vec![false, false, true, false, false, false, false, true, true, false]);
 
     }
@@ -42,7 +42,7 @@ mod solver_tests {
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
 
-        assert_eq!(collision_handler.is_arm_colliding_self(&forward_mats), false);
+        assert_eq!(collision_handler.is_arm_colliding_self_naive(&forward_mats), false);
         assert_eq!(collision_handler.find_arm_collisions_self(&forward_mats), vec![false, false, false, false, false, false, false, false, false, false]);
 
     }
@@ -71,7 +71,7 @@ mod solver_tests {
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
 
-        assert_eq!(collision_handler.is_arm_colliding_world(&forward_mats), true);
+        assert_eq!(collision_handler.is_arm_colliding_world_naive(&forward_mats), true);
         assert_eq!(collision_handler.find_arm_collisions_world(&forward_mats), vec![false, false, false, false, false, false, true, true, false, true]);
 
     }
@@ -100,7 +100,7 @@ mod solver_tests {
         let mats: Vec<Matrix4<f32>> = generate_matrices(IDENTITY, &angles, &axes, &radii);
         let forward_mats: Vec<Matrix4<f32>> = generate_forward_matrices(&mats);
 
-        assert_eq!(collision_handler.is_arm_colliding_world(&forward_mats), false);
+        assert_eq!(collision_handler.is_arm_colliding_world_naive(&forward_mats), false);
         assert_eq!(collision_handler.find_arm_collisions_world(&forward_mats), vec![false, false, false, false, false, false, false, false, false, false]);
 
     }

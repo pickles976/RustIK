@@ -44,7 +44,35 @@ impl CollisionHandler{
         }
     }
 
-    pub fn is_arm_colliding_self(&self, matrices: &Vec<Matrix4<f32>>) -> bool {
+    pub fn is_arm_colliding_self(&self, index: usize, matrices: &Vec<Matrix4<f32>>) -> bool {
+
+        let isometries: Vec<Isometry3<f32>> = self.get_arm_isometries(matrices);
+        let mut spheres: Vec<BoundingSphere<f32>> = vec![];
+        self.arm_spheres.iter().enumerate().for_each(|(i, sphere)| spheres.push(sphere.transform_by(&isometries[i])));
+
+        // Checks collisions of the colliders before the index against the
+        // colliders after the index. Since colliders in their own slice are guaranteed not to be colliding
+        // [] [] [] index [] [] []
+        for i in 0..index {
+            for j in index..self.arm_colliders.len() {
+                if j - i > 1 {
+                    if spheres[i].intersects(&spheres[j]) {
+                        let iso_i: Isometry3<f32> = isometries[i];
+                        let iso_j: Isometry3<f32> = isometries[j];
+                        let dist = query::distance(&iso_i, &self.arm_colliders[i], &iso_j, &self.arm_colliders[j]);
+                        if dist <= 0.0
+                        {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    pub fn is_arm_colliding_self_naive(&self, matrices: &Vec<Matrix4<f32>>) -> bool {
 
         let isometries: Vec<Isometry3<f32>> = self.get_arm_isometries(matrices);
         let mut spheres: Vec<BoundingSphere<f32>> = vec![];
@@ -98,7 +126,32 @@ impl CollisionHandler{
         collisions
     }
 
-    pub fn is_arm_colliding_world(&self, matrices: &Vec<Matrix4<f32>>) -> bool {
+    pub fn is_arm_colliding_world(&self, index: usize, matrices: &Vec<Matrix4<f32>>) -> bool {
+
+        let arm_isometries: Vec<Isometry3<f32>> = self.get_arm_isometries(matrices);
+        let world_isometries: Vec<Isometry3<f32>> = self.get_world_isometries();
+
+        let mut arm_spheres: Vec<BoundingSphere<f32>> = vec![];
+        self.arm_spheres.iter().enumerate().for_each(|(i, sphere)| arm_spheres.push(sphere.transform_by(&arm_isometries[i])));
+
+        for i in index..self.arm_colliders.len() {
+            for j in 0..self.world_colliders.len() {
+                if arm_spheres[i].intersects(&self.world_spheres[j]) {
+                    let iso_i: Isometry3<f32> = arm_isometries[i];
+                    let iso_j: Isometry3<f32> = world_isometries[j];
+                    let dist = query::distance(&iso_i, &self.arm_colliders[i], &iso_j, &self.world_colliders[j]);
+                    if dist <= 0.0
+                    {
+                        return true
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    pub fn is_arm_colliding_world_naive(&self, matrices: &Vec<Matrix4<f32>>) -> bool {
 
         let arm_isometries: Vec<Isometry3<f32>> = self.get_arm_isometries(matrices);
         let world_isometries: Vec<Isometry3<f32>> = self.get_world_isometries();
