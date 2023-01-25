@@ -11,6 +11,8 @@ mod genetics_tests {
     fn test_gene_crossover() {
 
         let thetas: Vec<f32> = vec![0.0, 1.0, 2.0];
+        let min_angles: Vec<f32> = vec![0.0, 0.0, 0.0];
+        let max_angles: Vec<f32> = vec![1.0, 1.0, 1.0];
         let learn_rate: f32 = 0.5;
 
         let gene_1: Gene = Gene::new(&thetas, learn_rate);
@@ -40,6 +42,8 @@ mod genetics_tests {
     fn test_population() {
 
         let thetas: Vec<f32> = vec![5.0, 5.0, 5.0, 5.0];
+        let min_angles: Vec<f32> = vec![0.0, 0.0, 0.0, 0.0];
+        let max_angles: Vec<f32> = vec![1.0, 1.0, 1.0, 1.0];
 
         // fitness function measures closeness to this thing
         let closure = move |thetas: &Vec<f32>| -> f32 {
@@ -60,8 +64,6 @@ mod genetics_tests {
         let start = Instant::now();
         for i in 0..100 {
             population.new_generation();
-            // println!("Closest fit: {:?}", population.alpha.as_ref().unwrap());
-            // println!("Minimum error: {:?}", population.min_err);
         }
         let duration = start.elapsed();
         println!("Elapsed time: {:?}", duration);

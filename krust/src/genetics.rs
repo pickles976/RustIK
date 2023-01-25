@@ -2,8 +2,8 @@ use std::{f32::consts::PI, fmt};
 use rand::{Rng, rngs::ThreadRng};
 use rayon::prelude::*;
 
-const MUTATION_SIZE: f32 = 1.0; // how large a mutation can be
-const MUTATION_RATE: f32 = 0.4;
+const MUTATION_SIZE: f32 = 0.25; // how large a mutation can be
+const MUTATION_RATE: f32 = 0.2;
 
 pub struct Gene {
     

@@ -160,9 +160,11 @@ mod solver_tests {
         let mut ik_solver: IKSolverGA = IKSolverGA::new(IDENTITY, &angles, &axes, &radii, &min_angles, &max_angles, collision_handler);
 
         let start = Instant::now();
-        ik_solver.solve(TARGET, 0.1);
+        println!("Loss: {}", ik_solver.loss);
+        ik_solver.solve(TARGET, 0.01);
         let duration = start.elapsed();
         println!("Elapsed time: {:?}", duration);
+        println!("Loss: {}", ik_solver.loss);
 
     }
 

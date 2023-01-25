@@ -54,8 +54,10 @@ impl InverseKinematics {
 
         let target: Matrix4<f32> = serde_json::from_str(target_str).unwrap();
 
-        self.ik_solver_gd.solve(target, thresh);
+        // self.ik_solver_gd.solve(target, thresh);
+        self.ik_solver_ga.solve(target, thresh);
 
-        serde_json::to_string(&self.ik_solver_gd.thetas).unwrap()
+        // serde_json::to_string(&self.ik_solver_gd.thetas).unwrap()
+        serde_json::to_string(&self.ik_solver_ga.thetas).unwrap()
     }
 }

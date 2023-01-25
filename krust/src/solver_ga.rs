@@ -7,7 +7,7 @@ use crate::genetics::{Population};
 
 
 const ROT_CORRECTION: f32 = PI;
-const MAX_STEPS: i32 = 50;
+const MAX_STEPS: i32 = 5;
 const PENALTY: f32 = 1000.0;
 
 pub struct IKSolverGA {
@@ -81,7 +81,7 @@ impl IKSolverGA {
         // use Box ptr to point to heap data (Population)
         self.population = Some( 
             Box::new(
-                Population::new(100, self.thetas.to_vec(), 
+                Population::new(100, self.thetas.to_vec(),
                     // copy in values to avoid lifetime constraints
                     self.generate_fitness(
                         self.origin, 
@@ -145,7 +145,8 @@ impl IKSolverGA {
     /// Calculate loss for the descent
     fn calculate_loss(&self, end_effector: &Matrix4<f32>) -> f32 {
         
-        if self.col_handler.is_arm_colliding_self(&self.forward_mats) { return PENALTY }
+        // if self.col_handler.is_arm_colliding_self(&self.forward_mats) { return PENALTY }
+        // if self.col_handler.is_arm_colliding_world(&self.forward_mats) { return PENALTY }
 
         transform_loss(end_effector, &self.target.unwrap(), self.arm_length, ROT_CORRECTION)
     }
@@ -173,10 +174,10 @@ impl IKSolverGA {
 
             let mut total: f32 = 0.0;
 
-            if _col_handler.is_arm_colliding_self(&forward_mats) { return PENALTY }
-            if _col_handler.is_arm_colliding_world(&forward_mats) { return PENALTY }
+            // if _col_handler.is_arm_colliding_self(&forward_mats) { return PENALTY }
+            // if _col_handler.is_arm_colliding_world(&forward_mats) { return PENALTY }
 
-            total += distance_loss(&end_effector, &_target, arm_length);
+            total += transform_loss(&end_effector, &_target, arm_length, ROT_CORRECTION);
     
             1.0 / total
         };
