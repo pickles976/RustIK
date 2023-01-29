@@ -1,9 +1,7 @@
 extern crate nalgebra as na;
 use na::{Vector3, Matrix4, clamp};
 use std::{fmt, f32::consts::PI};
-use crate::{matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss, distance_loss, self}, collision_handler::CollisionHandler};
-use fxhash::FxHashMap;
-use std::collections::HashMap;
+use crate::{matrices::{generate_matrices, generate_forward_matrices, generate_backward_matrices, transform_matrix, transform_loss}, collision_handler::CollisionHandler};
 
 const ROT_CORRECTION: f32 = PI;
 const MAX_D_LOSS: f32 = 0.5;
